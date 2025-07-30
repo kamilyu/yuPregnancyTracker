@@ -1,7 +1,7 @@
 
 "use client";
 
-import { differenceInDays, differenceInWeeks, format } from "date-fns";
+import { addWeeks, differenceInDays, differenceInWeeks, format } from "date-fns";
 import {
   Card,
   CardContent,
@@ -31,17 +31,19 @@ type DueDateCardProps = {
 
 export function DueDateCard({ dueDate, setDueDate }: DueDateCardProps) {
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(dueDate ?? undefined);
+    // This state will now hold the Last Menstrual Period date
+    const [selectedLMP, setSelectedLMP] = useState<Date | undefined>(undefined);
     const { toast } = useToast();
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
 
     const handleSave = () => {
-        if (selectedDate) {
-            setDueDate(selectedDate);
+        if (selectedLMP) {
+            const calculatedDueDate = addWeeks(selectedLMP, 40);
+            setDueDate(calculatedDueDate);
             toast({
                 title: "Due Date Saved!",
-                description: `Your due date is set to ${format(selectedDate, "PPP")}.`,
+                description: `Based on your last period, your estimated due date is ${format(calculatedDueDate, "PPP")}.`,
             })
             setDialogOpen(false);
         }
@@ -52,14 +54,14 @@ export function DueDateCard({ dueDate, setDueDate }: DueDateCardProps) {
             <Card className="flex flex-col items-center justify-center text-center p-8 bg-secondary">
                  <CalendarIcon className="w-12 h-12 text-primary mb-4" />
                  <h3 className="text-xl font-headline font-semibold">Welcome to StorkWatch!</h3>
-                 <p className="text-muted-foreground mt-2 mb-4">Set your due date to get started.</p>
+                 <p className="text-muted-foreground mt-2 mb-4">Let's calculate your due date to get started.</p>
                  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button>Set Your Due Date</Button>
+                        <Button>Calculate Your Due Date</Button>
                     </DialogTrigger>
                     <DueDateDialogContent 
-                        selectedDate={selectedDate} 
-                        setSelectedDate={setSelectedDate} 
+                        selectedDate={selectedLMP} 
+                        setSelectedDate={setSelectedLMP} 
                         handleSave={handleSave} 
                     />
                  </Dialog>
@@ -77,7 +79,7 @@ export function DueDateCard({ dueDate, setDueDate }: DueDateCardProps) {
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Your Journey</CardTitle>
         <CardDescription>
-          Due Date: {format(dueDate, "MMMM d, yyyy")}
+          Estimated Due Date: {format(dueDate, "MMMM d, yyyy")}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-3 gap-4 text-center">
@@ -86,7 +88,7 @@ export function DueDateCard({ dueDate, setDueDate }: DueDateCardProps) {
           <p className="text-sm text-muted-foreground">Weeks</p>
         </div>
         <div>
-          <p className="text-3xl font-bold text-primary">{daysRemaining}</p>
+          <p className="text-3xl font-bold text-primary">{daysRemaining > 0 ? daysRemaining : 0}</p>
           <p className="text-sm text-muted-foreground">Days to Go</p>
         </div>
         <div>
@@ -102,8 +104,8 @@ export function DueDateCard({ dueDate, setDueDate }: DueDateCardProps) {
                 </Button>
             </DialogTrigger>
             <DueDateDialogContent 
-                selectedDate={selectedDate} 
-                setSelectedDate={setSelectedDate} 
+                selectedDate={selectedLMP} 
+                setSelectedDate={setSelectedLMP} 
                 handleSave={handleSave} 
             />
         </Dialog>
@@ -114,15 +116,15 @@ export function DueDateCard({ dueDate, setDueDate }: DueDateCardProps) {
 function DueDateDialogContent({selectedDate, setSelectedDate, handleSave}: {selectedDate: Date | undefined, setSelectedDate: (date: Date | undefined) => void, handleSave: () => void}) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const tenMonthsFromNow = new Date();
-    tenMonthsFromNow.setMonth(tenMonthsFromNow.getMonth() + 10);
+    const nineMonthsAgo = new Date();
+    nineMonthsAgo.setMonth(nineMonthsAgo.getMonth() - 9);
 
     return (
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Update Your Due Date</DialogTitle>
+            <DialogTitle>Calculate Your Due Date</DialogTitle>
             <DialogDescription>
-              Select your estimated due date. You can change this at any time.
+              Select the first day of your last menstrual period. We'll estimate your due date from there.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center py-4">
@@ -131,13 +133,14 @@ function DueDateDialogContent({selectedDate, setSelectedDate, handleSave}: {sele
                 selected={selectedDate}
                 onSelect={setSelectedDate}
                 disabled={(date) =>
-                    date < today || date > tenMonthsFromNow
+                    date > today || date < nineMonthsAgo
                 }
                 initialFocus
+                defaultMonth={selectedDate || new Date()}
               />
           </div>
           <DialogFooter>
-            <Button onClick={handleSave} disabled={!selectedDate}>Save Changes</Button>
+            <Button onClick={handleSave} disabled={!selectedDate}>Calculate and Save</Button>
           </DialogFooter>
         </DialogContent>
     )

@@ -41,6 +41,8 @@ function DashboardPage() {
   const handleSetDueDate = async (date: Date | null) => {
     if (user && date) {
         const userDocRef = doc(db, 'users', user.uid);
+        // The `date` received is the calculated due date.
+        // The pregnancy start date is 40 weeks before the due date.
         const pregnancyStartDate = subWeeks(date, 40);
         await setDoc(userDocRef, { 
             dueDate: Timestamp.fromDate(date),

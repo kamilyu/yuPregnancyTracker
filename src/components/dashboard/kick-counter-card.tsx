@@ -11,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Flame, Footprints, History, Play, Square, Timer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { format, formatDistanceToNowStrict } from 'date-fns';
+import { format, formatDistanceToNowStrict, isValid } from 'date-fns';
 
 type KickSession = {
   id?: string;
@@ -186,7 +186,9 @@ export function KickCounterCard() {
                                    <div key={session.id} className="grid grid-cols-[1fr_auto] items-center gap-4 text-sm">
                                        <div>
                                             <p className='font-medium'>{session.kickCount} kicks in {formatDuration(session.sessionDuration)}</p>
-                                            <p className='text-muted-foreground'>{formatDistanceToNowStrict(session.sessionDate)} ago</p>
+                                            {isValid(session.sessionDate) && (
+                                                <p className='text-muted-foreground'>{formatDistanceToNowStrict(session.sessionDate)} ago</p>
+                                            )}
                                        </div>
                                    </div>
                                ))}

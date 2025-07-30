@@ -13,16 +13,14 @@ import { Sparkles, Baby } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { getWeeklyUpdate } from "@/ai/flows/weekly-update-flow";
+import type { WeeklyUpdateOutput } from "@/ai/schemas/weekly-update-schemas";
 
 
 type WeeklyUpdateCardProps = {
   currentWeek: number;
 };
 
-type UpdateData = {
-  title: string;
-  description: string;
-} | null;
+type UpdateData = WeeklyUpdateOutput | null;
 
 export function WeeklyUpdateCard({ currentWeek }: WeeklyUpdateCardProps) {
   const [isPending, startTransition] = useTransition();

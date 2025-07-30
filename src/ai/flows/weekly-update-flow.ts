@@ -9,18 +9,8 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { WeeklyUpdateInput, WeeklyUpdateInputSchema, WeeklyUpdateOutput, WeeklyUpdateOutputSchema } from '../schemas/weekly-update-schemas';
 
-export const WeeklyUpdateInputSchema = z.object({
-  week: z.number().min(1).max(42).describe('The current week of pregnancy.'),
-});
-export type WeeklyUpdateInput = z.infer<typeof WeeklyUpdateInputSchema>;
-
-export const WeeklyUpdateOutputSchema = z.object({
-    title: z.string().describe("A catchy, exciting title for the weekly update. Should include the week number."),
-    description: z.string().describe("A detailed, yet easy-to-understand summary of the baby's development for the given week. Should be a paragraph of 3-5 sentences. It should be scientifically-backed, covering growth milestones, organ development, and expected changes."),
-});
-export type WeeklyUpdateOutput = z.infer<typeof WeeklyUpdateOutputSchema>;
 
 const prompt = ai.definePrompt({
     name: 'weeklyUpdatePrompt',

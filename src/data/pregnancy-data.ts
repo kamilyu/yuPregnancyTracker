@@ -1,3 +1,4 @@
+
 export const weeklySizeComparisons = [
   { week: 4, item: "Poppy Seed", hint: "poppy seed" },
   { week: 5, item: "Apple Seed", hint: "apple seed" },

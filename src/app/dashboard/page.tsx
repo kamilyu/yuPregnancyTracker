@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { differenceInWeeks, subWeeks, Timestamp } from "date-fns";
+import { differenceInWeeks, subWeeks } from "date-fns";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DueDateCard } from "@/components/dashboard/due-date-card";
 import { SizeVizCard } from "@/components/dashboard/size-viz-card";
@@ -12,7 +12,7 @@ import { TaskListCard } from "@/components/dashboard/task-list-card";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import withAuth from "@/components/with-auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 function DashboardPage() {

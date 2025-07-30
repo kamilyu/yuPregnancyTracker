@@ -1,7 +1,10 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/auth-context";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from "firebase/firestore";
 import { format } from "date-fns";
 import {
   Card,
@@ -9,13 +12,13 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { PlusCircle, NotebookText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "../ui/scroll-area";
+import { Skeleton } from "../ui/skeleton";
 
 type LogEntry = {
   id: string;
@@ -24,13 +27,49 @@ type LogEntry = {
 };
 
 export function SymptomLogCard() {
+  const { user } = useAuth();
   const [notes, setNotes] = useState("");
-  // In a real app, this would be fetched from and updated to Firestore.
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const handleAddLog = () => {
-    if (notes.trim() === "") {
+  useEffect(() => {
+    if (!user) return;
+    
+    setLoading(true);
+    const q = query(
+        collection(db, 'users', user.uid, 'symptomLogs'), 
+        orderBy('createdAt', 'desc'), 
+        limit(20)
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const entries: LogEntry[] = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            entries.push({
+                id: doc.id,
+                notes: data.notes,
+                date: data.createdAt.toDate(),
+            });
+        });
+        setLogEntries(entries);
+        setLoading(false);
+    }, (error) => {
+        console.error("Error fetching logs: ", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not fetch your notes."
+        });
+        setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [user, toast]);
+
+  const handleAddLog = async () => {
+    if (notes.trim() === "" || !user) {
         toast({
             variant: "destructive",
             title: "Empty Note",
@@ -38,19 +77,25 @@ export function SymptomLogCard() {
         })
       return;
     }
-    const newEntry: LogEntry = {
-      id: new Date().toISOString(), // Use a proper unique ID in production
-      date: new Date(),
-      notes: notes.trim(),
-    };
 
-    // Add Firestore save logic here
-    setLogEntries([newEntry, ...logEntries]);
-    setNotes("");
-    toast({
-        title: "Note Saved",
-        description: "Your thoughts have been logged."
-    })
+    try {
+        await addDoc(collection(db, 'users', user.uid, 'symptomLogs'), {
+            notes: notes.trim(),
+            createdAt: serverTimestamp()
+        });
+        setNotes("");
+        toast({
+            title: "Note Saved",
+            description: "Your thoughts have been logged."
+        });
+    } catch (error) {
+         console.error("Error adding log: ", error);
+         toast({
+            variant: "destructive",
+            title: "Save Failed",
+            description: "Could not save your note. Please try again.",
+        })
+    }
   };
 
   return (
@@ -68,19 +113,26 @@ export function SymptomLogCard() {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           className="h-28"
+          disabled={!user}
         />
-        <Button onClick={handleAddLog} className="self-start">
+        <Button onClick={handleAddLog} className="self-start" disabled={!user || notes.trim() === ""}>
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Log Entry
         </Button>
         <div className="flex-grow mt-4">
           <h4 className="font-semibold mb-2">Recent Entries</h4>
           <ScrollArea className="h-48 pr-4 border-t">
-            {logEntries.length > 0 ? (
+            {loading ? (
+                <div className="space-y-4 py-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            ) : logEntries.length > 0 ? (
                 <div className="space-y-4 py-4">
                     {logEntries.map((entry) => (
-                        <div key={entry.id} className="text-sm">
-                            <p className="font-semibold">{format(entry.date, 'MMMM d, yyyy')}</p>
+                        <div key={entry.id} className="text-sm p-2 rounded-md bg-secondary/30">
+                            <p className="font-semibold">{format(entry.date, 'MMMM d, yyyy - h:mm a')}</p>
                             <p className="text-muted-foreground whitespace-pre-wrap">{entry.notes}</p>
                         </div>
                     ))}

@@ -1,7 +1,10 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useAuth } from "@/context/auth-context";
+import { db } from "@/lib/firebase";
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
@@ -24,16 +27,35 @@ type TaskListCardProps = {
 };
 
 export function TaskListCard({ currentTrimester }: TaskListCardProps) {
-  // In a real app, checked state would be fetched from and updated to Firestore.
+  const { user } = useAuth();
   const [checkedTasks, setCheckedTasks] = useState<Record<string, boolean>>({});
 
-  const handleCheckChange = (taskId: string) => {
-    setCheckedTasks((prev) => {
-        const newCheckedState = {...prev, [taskId]: !prev[taskId]};
-        // Add Firestore save logic here
-        console.log("Updated checked tasks:", newCheckedState);
-        return newCheckedState;
-    });
+  useEffect(() => {
+    const fetchCheckedTasks = async () => {
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists() && userDoc.data().checkedTasks) {
+          setCheckedTasks(userDoc.data().checkedTasks);
+        }
+      }
+    };
+    fetchCheckedTasks();
+  }, [user]);
+
+  const handleCheckChange = async (taskId: string) => {
+    if (!user) return;
+
+    const newCheckedState = {...checkedTasks, [taskId]: !checkedTasks[taskId]};
+    setCheckedTasks(newCheckedState);
+    
+    try {
+        const userDocRef = doc(db, 'users', user.uid);
+        await setDoc(userDocRef, { checkedTasks: newCheckedState }, { merge: true });
+    } catch (error) {
+        console.error("Error saving checked tasks:", error);
+        // Optionally revert state and show toast
+    }
   };
 
   const defaultAccordionValue = useMemo(() => `trimester-${currentTrimester}`, [currentTrimester]);
@@ -64,6 +86,7 @@ export function TaskListCard({ currentTrimester }: TaskListCardProps) {
                         id={task.id}
                         checked={!!checkedTasks[task.id]}
                         onCheckedChange={() => handleCheckChange(task.id)}
+                        disabled={!user}
                       />
                       <label
                         htmlFor={task.id}

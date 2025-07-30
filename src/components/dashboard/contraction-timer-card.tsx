@@ -223,7 +223,8 @@ export function ContractionTimerCard() {
     }
   };
   
-  const allContractions = [...pastSessions, ...currentSession].sort((a,b) => b.startTime - a.startTime);
+  const allContractions = [...pastSessions.filter(ps => !currentSession.some(cs => cs.id === ps.id)), ...currentSession]
+    .sort((a, b) => b.startTime - a.startTime);
 
 
   const calculateStats = (contractions: Contraction[]) => {
@@ -329,7 +330,7 @@ export function ContractionTimerCard() {
                 {allContractions.length > 0 ? (
                     <div className='p-2 space-y-2'>
                         {allContractions.map((c) => (
-                            <div key={c.startTime} className={`p-2 rounded-md ${currentSession.some(cs => cs.startTime === c.startTime) ? 'bg-secondary/80' : 'bg-secondary/30'} grid grid-cols-4 items-center text-sm gap-2`}>
+                            <div key={c.id || c.startTime} className={`p-2 rounded-md ${currentSession.some(cs => cs.startTime === c.startTime) ? 'bg-secondary/80' : 'bg-secondary/30'} grid grid-cols-4 items-center text-sm gap-2`}>
                                 <div className='font-medium'>
                                     {isValid(new Date(c.startTime)) ? format(new Date(c.startTime), 'h:mm:ss a') : '--:--:--'}
                                 </div>
@@ -362,5 +363,3 @@ export function ContractionTimerCard() {
     </Card>
   );
 }
-
-    

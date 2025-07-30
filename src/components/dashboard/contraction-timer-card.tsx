@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { collection, doc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -146,18 +146,11 @@ export function ContractionTimerCard() {
     try {
         const batch = writeBatch(db);
         const sessionDate = new Date();
+        const userContractionsCol = collection(db, 'users', user.uid, 'contractionTracking');
+
         contractions.forEach(c => {
-            const docRef = addDoc(collection(db, 'users', user.uid, 'contractionTracking'), {
-                userId: user.uid,
-                sessionDate: sessionDate, // Use the same date for the whole session
-                contractionStart: new Date(c.startTime),
-                contractionEnd: c.endTime ? new Date(c.endTime) : null,
-                duration: c.duration,
-                intervalBetween: c.interval,
-                intensity: c.intensity,
-                createdAt: serverTimestamp()
-            }).ref;
-            batch.set(docRef, {
+            const newDocRef = doc(userContractionsCol);
+            batch.set(newDocRef, {
                 userId: user.uid,
                 sessionDate: sessionDate, // Use the same date for the whole session
                 contractionStart: new Date(c.startTime),

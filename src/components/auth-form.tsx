@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { StorkLogo } from "@/components/logo";
 import { Loader2 } from "lucide-react";
+import { auth } from "@/lib/firebase";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -47,30 +52,30 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    // Placeholder for Firebase auth logic
-    console.log("Form submitted with:", values);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // This is where you would handle Firebase login or signup
-    // For now, we'll simulate a success and redirect to the dashboard
-    const isSuccess = true; // Simulate success
-
-    setIsLoading(false);
-
-    if (isSuccess) {
+    try {
+      if (mode === "signup") {
+        await createUserWithEmailAndPassword(
+          auth,
+          values.email,
+          values.password
+        );
+      } else {
+        await signInWithEmailAndPassword(auth, values.email, values.password);
+      }
       toast({
         title: mode === "login" ? "Login Successful" : "Account Created",
         description: "Redirecting to your dashboard...",
       });
       router.push("/dashboard");
-    } else {
+    } catch (error: any) {
+      console.error("Authentication error:", error);
       toast({
         variant: "destructive",
         title: "Authentication Failed",
-        description: "Please check your credentials and try again.",
+        description: error.message || "Please check your credentials and try again.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

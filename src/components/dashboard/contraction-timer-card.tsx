@@ -4,14 +4,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, doc, writeBatch, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, writeBatch, serverTimestamp, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Play, Square, Timer, Trash2, HeartPulse, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, formatDistanceToNowStrict, isValid } from 'date-fns';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,14 +25,19 @@ import {
 } from "@/components/ui/alert-dialog"
 
 type Contraction = {
+  id?: string;
   startTime: number; // Unix timestamp
   endTime: number | null; // Unix timestamp
   duration: number | null; // seconds
   interval: number | null; // seconds from start of previous
   intensity: number;
+  // For firestore data
+  contractionStart?: Date;
+  sessionDate?: Date;
 };
 
 function formatDuration(seconds: number) {
+    if (isNaN(seconds) || seconds < 0) return '00:00';
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60);
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
@@ -45,7 +50,9 @@ export function ContractionTimerCard() {
   const { toast } = useToast();
   
   const [isTiming, setIsTiming] = useState(false);
-  const [contractions, setContractions] = useState<Contraction[]>([]);
+  const [currentSession, setCurrentSession] = useState<Contraction[]>([]);
+  const [pastSessions, setPastSessions] = useState<Contraction[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [currentDuration, setCurrentDuration] = useState(0);
   const [intensity, setIntensity] = useState(5);
 
@@ -57,31 +64,63 @@ export function ContractionTimerCard() {
     try {
       const savedSession = localStorage.getItem(`${LOCAL_STORAGE_KEY}_${user.uid}`);
       if (savedSession) {
-        setContractions(JSON.parse(savedSession));
+        setCurrentSession(JSON.parse(savedSession));
       }
     } catch (error) {
       console.error("Failed to load session from local storage", error);
     }
   }, [user]);
 
-  // Save session to local storage on change
+  // Save current session to local storage on change
   useEffect(() => {
     if (!user) return;
     try {
-        if (contractions.length > 0) {
-            localStorage.setItem(`${LOCAL_STORAGE_KEY}_${user.uid}`, JSON.stringify(contractions));
+        if (currentSession.length > 0) {
+            localStorage.setItem(`${LOCAL_STORAGE_KEY}_${user.uid}`, JSON.stringify(currentSession));
         } else {
             localStorage.removeItem(`${LOCAL_STORAGE_KEY}_${user.uid}`);
         }
     } catch (error) {
       console.error("Failed to save session to local storage", error);
     }
-  }, [contractions, user]);
+  }, [currentSession, user]);
+
+  // Fetch past sessions from firestore
+   useEffect(() => {
+    if (!user) return;
+    setLoadingHistory(true);
+    const q = query(
+        collection(db, 'users', user.uid, 'contractionTracking'), 
+        orderBy('createdAt', 'desc'), 
+        limit(50) // get a decent number of individual contractions
+    );
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const sessions: Contraction[] = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            sessions.push({ 
+                id: doc.id,
+                 ...data,
+                startTime: data.contractionStart?.toDate().getTime(),
+                duration: data.duration,
+                interval: data.intervalBetween,
+                intensity: data.intensity,
+            } as Contraction);
+        });
+        setPastSessions(sessions);
+        setLoadingHistory(false);
+    }, (error) => {
+        console.error("Error fetching recent sessions:", error);
+        setLoadingHistory(false);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
 
   const startTimer = useCallback(() => {
     const now = Date.now();
-    const lastContraction = contractions[contractions.length - 1];
+    const lastContraction = currentSession[currentSession.length - 1];
     const newContraction: Contraction = {
       startTime: now,
       endTime: null,
@@ -90,14 +129,14 @@ export function ContractionTimerCard() {
       intensity: intensity,
     };
     
-    setContractions(prev => [...prev, newContraction]);
+    setCurrentSession(prev => [...prev, newContraction]);
     setIsTiming(true);
     setCurrentDuration(0);
 
     timerRef.current = setInterval(() => {
       setCurrentDuration(prev => prev + 1);
     }, 1000);
-  }, [intensity, contractions]);
+  }, [intensity, currentSession]);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
@@ -105,12 +144,15 @@ export function ContractionTimerCard() {
     }
     setIsTiming(false);
     
-    setContractions(prev => {
+    setCurrentSession(prev => {
       const last = prev[prev.length - 1];
       if (last) {
-        last.endTime = Date.now();
-        last.duration = currentDuration;
-        return [...prev.slice(0, -1), last];
+        const updatedContraction = {
+            ...last,
+            endTime: Date.now(),
+            duration: currentDuration,
+        }
+        return [...prev.slice(0, -1), updatedContraction];
       }
       return prev;
     });
@@ -124,17 +166,17 @@ export function ContractionTimerCard() {
     }
   };
 
-  const handleClearSession = () => {
-    setContractions([]);
+  const handleClearCurrentSession = () => {
     if (isTiming) stopTimer();
+    setCurrentSession([]);
     toast({
         title: "Session Cleared",
-        description: "Your current contraction history has been cleared.",
+        description: "Your current contraction timing has been cleared.",
     });
   };
 
   const handleSaveSession = async () => {
-    if (!user || contractions.length === 0) {
+    if (!user || currentSession.length === 0) {
         toast({
             variant: "destructive",
             title: "No data to save",
@@ -148,7 +190,7 @@ export function ContractionTimerCard() {
         const sessionDate = new Date();
         const userContractionsCol = collection(db, 'users', user.uid, 'contractionTracking');
 
-        contractions.forEach(c => {
+        currentSession.forEach(c => {
             const newDocRef = doc(userContractionsCol);
             batch.set(newDocRef, {
                 userId: user.uid,
@@ -166,10 +208,10 @@ export function ContractionTimerCard() {
 
         toast({
             title: "Session Saved!",
-            description: `Successfully saved ${contractions.length} contractions to the cloud.`
+            description: `Successfully saved ${currentSession.length} contractions.`
         });
         // Clear local session after successful save
-        handleClearSession();
+        setCurrentSession([]);
 
     } catch (error) {
         console.error("Error saving session: ", error);
@@ -180,25 +222,32 @@ export function ContractionTimerCard() {
         })
     }
   };
+  
+  const allContractions = [...pastSessions, ...currentSession].sort((a,b) => b.startTime - a.startTime);
 
-  const calculateStats = () => {
+
+  const calculateStats = (contractions: Contraction[]) => {
     if (contractions.length < 2) return { avgDuration: 0, avgFrequency: 0, isRegular: false };
-    const validContractions = contractions.filter(c => c.duration !== null);
+    const validContractions = contractions.filter(c => c.duration !== null && c.duration > 0);
+    if (validContractions.length < 2) return { avgDuration: 0, avgFrequency: 0, isRegular: false };
+    
     const totalDuration = validContractions.reduce((acc, c) => acc + c.duration!, 0);
     const avgDuration = totalDuration / validContractions.length;
 
-    const validIntervals = contractions.slice(1).map(c => c.interval).filter(i => i !== null);
+    const validIntervals = contractions.slice(1).map(c => c.interval).filter((i): i is number => i !== null && i > 0);
+     if (validIntervals.length === 0) return { avgDuration, avgFrequency: 0, isRegular: false };
+
     const totalIntervalTime = validIntervals.reduce((acc, i) => acc + i!, 0);
     const avgFrequency = totalIntervalTime / validIntervals.length;
 
-    // A simple check for regularity
     const stdDev = Math.sqrt(validIntervals.map(x => Math.pow(x! - avgFrequency, 2)).reduce((a, b) => a + b) / validIntervals.length);
-    const isRegular = stdDev < 60; // if standard deviation is less than a minute
+    const isRegular = stdDev < 60;
 
     return { avgDuration, avgFrequency, isRegular };
   }
 
-  const { avgDuration, avgFrequency, isRegular } = calculateStats();
+  const { avgDuration, avgFrequency, isRegular } = calculateStats(currentSession);
+  const lastContractionDuration = currentSession.length > 0 ? currentSession[currentSession.length - 1].duration : 0;
 
   return (
     <Card>
@@ -212,10 +261,10 @@ export function ContractionTimerCard() {
       <CardContent className="space-y-6">
         <div className="flex flex-col items-center justify-center gap-4 p-4 bg-secondary/30 rounded-lg">
             <div className='text-6xl font-mono font-bold text-primary tabular-nums'>
-                {formatDuration(isTiming ? currentDuration : contractions[contractions.length-1]?.duration ?? 0)}
+                {formatDuration(isTiming ? currentDuration : lastContractionDuration ?? 0)}
             </div>
             <p className='text-muted-foreground'>
-                {isTiming ? "Contraction in Progress..." : "Last Contraction Duration"}
+                {isTiming ? "Contraction in Progress..." : (currentSession.length > 0 ? "Last Contraction Duration" : "Start a new session")}
             </p>
             <Button onClick={handleStartStop} size="lg" className="w-48" variant={isTiming ? 'destructive' : 'default'}>
                 {isTiming ? <Square className="mr-2"/> : <Play className="mr-2"/>}
@@ -245,31 +294,31 @@ export function ContractionTimerCard() {
             <div className="flex justify-between items-center">
                 <h4 className="font-semibold">Session History</h4>
                 <div className='flex gap-2'>
+                     <Button variant="default" size="sm" onClick={handleSaveSession} disabled={currentSession.length === 0}>
+                        <Save /> Save Session
+                    </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm" disabled={contractions.length === 0}>
+                            <Button variant="outline" size="sm" disabled={currentSession.length === 0}>
                                 <Trash2 /> Clear
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogTitle>Clear current session?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This will permanently delete your current session history from this device. This action cannot be undone.
+                                This will delete the current timed contractions from this device. This won't affect any sessions you've already saved.
                             </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleClearSession}>Clear Session</AlertDialogAction>
+                            <AlertDialogAction onClick={handleClearCurrentSession}>Clear Current</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
-                     <Button variant="default" size="sm" onClick={handleSaveSession} disabled={contractions.length === 0}>
-                        <Save /> Save Session
-                    </Button>
                 </div>
             </div>
-            {contractions.length > 0 &&
+            {currentSession.length > 0 &&
                 <div className='grid grid-cols-3 text-center text-sm bg-secondary/50 p-2 rounded-md'>
                     <div><p className='font-medium'>{formatDuration(avgDuration)}</p><p className='text-muted-foreground'>Avg. Duration</p></div>
                     <div><p className='font-medium'>{formatDuration(avgFrequency)}</p><p className='text-muted-foreground'>Avg. Frequency</p></div>
@@ -277,12 +326,12 @@ export function ContractionTimerCard() {
                 </div>
             }
             <ScrollArea className="h-48 border rounded-md">
-                {contractions.length > 0 ? (
+                {allContractions.length > 0 ? (
                     <div className='p-2 space-y-2'>
-                        {contractions.slice().reverse().map((c, index) => (
-                            <div key={c.startTime} className='p-2 rounded-md bg-secondary/30 grid grid-cols-4 items-center text-sm gap-2'>
+                        {allContractions.map((c) => (
+                            <div key={c.startTime} className={`p-2 rounded-md ${currentSession.some(cs => cs.startTime === c.startTime) ? 'bg-secondary/80' : 'bg-secondary/30'} grid grid-cols-4 items-center text-sm gap-2`}>
                                 <div className='font-medium'>
-                                    {format(new Date(c.startTime), 'h:mm:ss a')}
+                                    {isValid(new Date(c.startTime)) ? format(new Date(c.startTime), 'h:mm:ss a') : '--:--:--'}
                                 </div>
                                 <div className='text-muted-foreground'>
                                     <span className='font-semibold text-foreground'>{c.duration ? formatDuration(c.duration) : '--:--'}</span> dur.
@@ -298,8 +347,12 @@ export function ContractionTimerCard() {
                     </div>
                 ) : (
                     <div className="text-center text-muted-foreground pt-10">
-                        <p>No contractions recorded yet.</p>
-                        <p>Press "Start" to begin timing.</p>
+                        {loadingHistory ? <p>Loading history...</p> :
+                        <>
+                            <p>No contractions recorded yet.</p>
+                            <p>Press "Start" to begin timing.</p>
+                        </>
+                        }
                     </div>
                 )}
             </ScrollArea>
@@ -309,3 +362,5 @@ export function ContractionTimerCard() {
     </Card>
   );
 }
+
+    

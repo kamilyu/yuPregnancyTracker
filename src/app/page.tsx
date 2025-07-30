@@ -82,35 +82,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-         <section className="py-16 md:py-24 bg-secondary/50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-              <div className="md:w-1/2">
-                <Image
-                  src="https://placehold.co/600x600.png"
-                  alt="Happy pregnant woman"
-                  data-ai-hint="happy pregnant woman"
-                  width={600}
-                  height={600}
-                  className="rounded-lg shadow-xl"
-                />
-              </div>
-              <div className="md:w-1/2 text-center md:text-left">
-                 <h2 className="text-3xl font-headline font-bold text-slate-800">
-                  Ready to Begin?
-                </h2>
-                <p className="mt-4 text-lg text-slate-600">
-                  Join thousands of expecting parents who trust StorkWatch. Create your account today and start cherishing every moment of your pregnancy.
-                </p>
-                <div className="mt-6">
-                   <SignInButton />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
       </main>
 
       <footer className="bg-slate-800 text-slate-300 py-8">

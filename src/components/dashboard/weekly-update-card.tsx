@@ -12,24 +12,7 @@ import {
 import { Sparkles, Baby } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-
-// Placeholder for a server action. In a real app, this would be in an actions file.
-async function getWeeklyUpdate(week: number): Promise<{ title: string; description: string }> {
-  console.log(`Fetching update for week ${week}`);
-  // In a real app, this would call a Genkit flow.
-  // const update = await someAiFlow.run({ week });
-  // For now, we simulate a network request and return mock data.
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  if (Math.random() < 0.1) { // Simulate occasional errors
-      throw new Error("Failed to fetch weekly update.");
-  }
-
-  return {
-    title: `Week ${week}: Exciting Developments!`,
-    description: `This week, your baby is undergoing amazing changes. Their neural pathways are forming rapidly, and they are starting to practice breathing motions. Key organs like the heart and kidneys are now fully functional. You might even feel more distinct movements as they explore their cozy home!`
-  }
-}
+import { getWeeklyUpdate } from "@/ai/flows/weekly-update-flow";
 
 
 type WeeklyUpdateCardProps = {
@@ -47,9 +30,10 @@ export function WeeklyUpdateCard({ currentWeek }: WeeklyUpdateCardProps) {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (!currentWeek) return;
     startTransition(async () => {
         try {
-            const data = await getWeeklyUpdate(currentWeek);
+            const data = await getWeeklyUpdate({week: currentWeek});
             setUpdateData(data);
         } catch (error) {
             console.error(error);

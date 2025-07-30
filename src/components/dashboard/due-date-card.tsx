@@ -34,10 +34,10 @@ export function DueDateCard({ dueDate, setDueDate }: DueDateCardProps) {
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(dueDate ?? undefined);
     const { toast } = useToast();
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
 
     const handleSave = () => {
         if (selectedDate) {
-            // Add Firestore save logic here
             setDueDate(selectedDate);
             toast({
                 title: "Due Date Saved!",
@@ -112,6 +112,11 @@ export function DueDateCard({ dueDate, setDueDate }: DueDateCardProps) {
 }
 
 function DueDateDialogContent({selectedDate, setSelectedDate, handleSave}: {selectedDate: Date | undefined, setSelectedDate: (date: Date | undefined) => void, handleSave: () => void}) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tenMonthsFromNow = new Date();
+    tenMonthsFromNow.setMonth(tenMonthsFromNow.getMonth() + 10);
+
     return (
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -126,7 +131,7 @@ function DueDateDialogContent({selectedDate, setSelectedDate, handleSave}: {sele
                 selected={selectedDate}
                 onSelect={setSelectedDate}
                 disabled={(date) =>
-                  date < new Date() || date > new Date(new Date().setMonth(new Date().getMonth() + 10))
+                    date < today || date > tenMonthsFromNow
                 }
                 initialFocus
               />

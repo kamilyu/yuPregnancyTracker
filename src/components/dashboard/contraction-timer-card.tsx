@@ -7,7 +7,6 @@ import { db } from '@/lib/firebase';
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy, limit, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Play, Square, Timer, Trash2, HeartPulse, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -30,7 +29,6 @@ type Contraction = {
   endTime: number | null; // Unix timestamp
   duration: number | null; // seconds
   interval: number | null; // seconds from start of previous
-  intensity: number;
   // For firestore data
   contractionStart?: Date;
   sessionDate?: Date;
@@ -54,7 +52,6 @@ export function ContractionTimerCard() {
   const [pastSessions, setPastSessions] = useState<Contraction[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [currentDuration, setCurrentDuration] = useState(0);
-  const [intensity, setIntensity] = useState(5);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -104,7 +101,6 @@ export function ContractionTimerCard() {
                 startTime: data.contractionStart?.toDate().getTime(),
                 duration: data.duration,
                 interval: data.intervalBetween,
-                intensity: data.intensity,
             } as Contraction);
         });
         setPastSessions(sessions);
@@ -126,7 +122,6 @@ export function ContractionTimerCard() {
       endTime: null,
       duration: null,
       interval: lastContraction ? (now - lastContraction.startTime) / 1000 : null,
-      intensity: intensity,
     };
     
     setCurrentSession(prev => [...prev, newContraction]);
@@ -136,7 +131,7 @@ export function ContractionTimerCard() {
     timerRef.current = setInterval(() => {
       setCurrentDuration(prev => prev + 1);
     }, 1000);
-  }, [intensity, currentSession]);
+  }, [currentSession]);
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
@@ -199,7 +194,6 @@ export function ContractionTimerCard() {
                 contractionEnd: c.endTime ? new Date(c.endTime) : null,
                 duration: c.duration,
                 intervalBetween: c.interval,
-                intensity: c.intensity,
                 createdAt: serverTimestamp()
             });
         });
@@ -291,24 +285,6 @@ export function ContractionTimerCard() {
             </Button>
         </div>
         
-        {!isTiming && (
-             <div className='space-y-3 px-2'>
-                <label htmlFor="intensity" className='text-sm font-medium'>Intensity (1-10)</label>
-                <div className="flex items-center gap-4">
-                    <Slider 
-                        id="intensity"
-                        min={1} 
-                        max={10} 
-                        step={1}
-                        value={[intensity]}
-                        onValueChange={(value) => setIntensity(value[0])}
-                        disabled={isTiming}
-                    />
-                    <span className='font-semibold text-primary w-6 text-center'>{intensity}</span>
-                </div>
-            </div>
-        )}
-
         <div className='space-y-2'>
             <div className="flex justify-between items-center">
                 <h4 className="font-semibold">Session History</h4>
@@ -348,7 +324,7 @@ export function ContractionTimerCard() {
                 {allContractions.length > 0 ? (
                     <div className='p-2 space-y-2'>
                         {allContractions.map((c) => (
-                            <div key={c.id || c.startTime} className={`p-2 rounded-md ${currentSession.some(cs => cs.startTime === c.startTime) ? 'bg-secondary/80' : 'bg-secondary/30'} grid grid-cols-[1fr,auto,auto,auto,auto] items-center text-sm gap-2`}>
+                            <div key={c.id || c.startTime} className={`p-2 rounded-md ${currentSession.some(cs => cs.startTime === c.startTime) ? 'bg-secondary/80' : 'bg-secondary/30'} grid grid-cols-[1fr,auto,auto,auto] items-center text-sm gap-2`}>
                                 <div className='font-medium'>
                                     {isValid(new Date(c.startTime)) ? format(new Date(c.startTime), 'h:mm:ss a') : '--:--:--'}
                                 </div>
@@ -357,9 +333,6 @@ export function ContractionTimerCard() {
                                 </div>
                                  <div className='text-muted-foreground'>
                                     <span className='font-semibold text-foreground'>{c.interval ? formatDuration(c.interval) : '--:--'}</span> freq.
-                                </div>
-                                 <div className='text-muted-foreground'>
-                                    Int: <span className='font-semibold text-foreground'>{c.intensity}</span>
                                 </div>
                                 {c.id && (
                                     <AlertDialog>
@@ -403,4 +376,5 @@ export function ContractionTimerCard() {
   );
 }
 
+    
     

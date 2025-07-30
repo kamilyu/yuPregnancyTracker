@@ -4,20 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { StorkLogo } from "@/components/logo";
 import { Baby, Calendar, CheckCircle, HeartHandshake, NotebookText, Sparkles } from "lucide-react";
+import { SignInButton } from "@/components/sign-in-button";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <StorkLogo />
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" asChild>
-            <Link href="/login">Log In</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/signup">Sign Up Free</Link>
-          </Button>
-        </div>
+        <SignInButton />
       </header>
 
       <main className="flex-1">
@@ -38,9 +32,7 @@ export default function Home() {
               and a supportive community.
             </p>
             <div className="mt-8">
-              <Button size="lg" asChild>
-                <Link href="/signup">Start Your Journey for Free</Link>
-              </Button>
+               <SignInButton />
             </div>
           </div>
         </section>
@@ -112,9 +104,7 @@ export default function Home() {
                   Join thousands of expecting parents who trust StorkWatch. Create your account today and start cherishing every moment of your pregnancy.
                 </p>
                 <div className="mt-6">
-                  <Button size="lg" asChild>
-                    <Link href="/signup">Sign Up Now</Link>
-                  </Button>
+                   <SignInButton />
                 </div>
               </div>
             </div>

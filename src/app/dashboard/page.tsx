@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
-import { differenceInWeeks } from "date-fns";
+import { differenceInWeeks, subWeeks, Timestamp } from "date-fns";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DueDateCard } from "@/components/dashboard/due-date-card";
 import { SizeVizCard } from "@/components/dashboard/size-viz-card";
@@ -9,27 +10,48 @@ import { WeeklyUpdateCard } from "@/components/dashboard/weekly-update-card";
 import { SymptomLogCard } from "@/components/dashboard/symptom-log-card";
 import { TaskListCard } from "@/components/dashboard/task-list-card";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
+import withAuth from "@/components/with-auth";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
-export default function DashboardPage() {
-  // In a real app, this would be fetched from Firestore for the logged-in user.
+function DashboardPage() {
+  const { user, loading: authLoading } = useAuth();
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Simulate fetching user data
   useEffect(() => {
     const fetchUserData = async () => {
-        // Simulate API call to get user's due date
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // Example: set a pre-existing due date
-        // const userDueDate = new Date();
-        // userDueDate.setDate(userDueDate.getDate() + 180);
-        // setDueDate(userDueDate);
+      if (user) {
+        setLoading(true);
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          if (data.dueDate && data.dueDate.toDate) {
+            setDueDate(data.dueDate.toDate());
+          }
+        }
         setLoading(false);
+      }
     };
     fetchUserData();
-  }, []);
+  }, [user]);
+  
+  const handleSetDueDate = async (date: Date | null) => {
+    if (user && date) {
+        const userDocRef = doc(db, 'users', user.uid);
+        const pregnancyStartDate = subWeeks(date, 40);
+        await setDoc(userDocRef, { 
+            dueDate: Timestamp.fromDate(date),
+            pregnancyStartDate: Timestamp.fromDate(pregnancyStartDate)
+        }, { merge: true });
+        setDueDate(date);
+    }
+  }
 
-  if (loading) {
+
+  if (authLoading || loading) {
     return (
         <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -47,12 +69,12 @@ export default function DashboardPage() {
       <main className="container mx-auto p-4 sm:p-6 lg:p-8">
         {!dueDate ? (
             <div className="max-w-md mx-auto">
-                 <DueDateCard dueDate={dueDate} setDueDate={setDueDate} />
+                 <DueDateCard dueDate={dueDate} setDueDate={handleSetDueDate} />
             </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-3">
-                <DueDateCard dueDate={dueDate} setDueDate={setDueDate} />
+                <DueDateCard dueDate={dueDate} setDueDate={handleSetDueDate} />
             </div>
             
             <div className="lg:col-span-1 space-y-6">
@@ -76,3 +98,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+export default withAuth(DashboardPage);

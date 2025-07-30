@@ -1,6 +1,6 @@
+
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { StorkLogo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -15,20 +15,38 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/auth-context";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 export function DashboardHeader() {
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleLogout = async () => {
-    // Placeholder for Firebase logout logic
-    console.log("User logging out...");
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out.",
-    });
-    // Redirect to landing page after logout
-    router.push("/");
+    try {
+      await signOut(auth);
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        variant: "destructive",
+        title: "Logout Failed",
+        description: "Something went wrong. Please try again.",
+      });
+    }
+  };
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return <User />;
+    const names = name.split(' ');
+    const initials = names.map(n => n[0]).join('');
+    return initials.length > 2 ? initials.substring(0, 2) : initials;
   };
 
   return (
@@ -39,9 +57,9 @@ export function DashboardHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-9 w-9">
-                <AvatarImage src="https://placehold.co/100x100.png" alt="User avatar" data-ai-hint="user avatar" />
+                <AvatarImage src={user?.photoURL ?? ''} alt={user?.displayName ?? 'User avatar'} />
                 <AvatarFallback>
-                  <User />
+                  {user ? getInitials(user.displayName) : <User />}
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -49,9 +67,9 @@ export function DashboardHeader() {
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Welcome!</p>
+                <p className="text-sm font-medium leading-none">{user?.displayName ?? 'Welcome!'}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  user@example.com
+                  {user?.email ?? 'user@example.com'}
                 </p>
               </div>
             </DropdownMenuLabel>

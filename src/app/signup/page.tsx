@@ -1,4 +1,4 @@
-import { AuthForm } from "@/components/auth-form";
+import { SignIn } from "@/components/sign-in";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function SignupPage() {
-  return <AuthForm mode="signup" />;
+  return <SignIn />;
 }

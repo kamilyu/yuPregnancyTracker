@@ -4,14 +4,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, doc, writeBatch, serverTimestamp, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { collection, doc, writeBatch, serverTimestamp, query, orderBy, limit, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Play, Square, Timer, Trash2, HeartPulse, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { format, formatDistanceToNowStrict, isValid } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -222,6 +222,24 @@ export function ContractionTimerCard() {
         })
     }
   };
+
+  const handleDeleteContraction = async (id: string) => {
+    if (!user) return;
+    try {
+        await deleteDoc(doc(db, 'users', user.uid, 'contractionTracking', id));
+        toast({
+            title: "Entry Deleted",
+            description: "The contraction has been removed from your history."
+        });
+    } catch (error) {
+        console.error("Error deleting contraction: ", error);
+        toast({
+            variant: "destructive",
+            title: "Delete Failed",
+            description: "Could not delete the entry. Please try again."
+        });
+    }
+  };
   
   const allContractions = [...pastSessions.filter(ps => !currentSession.some(cs => cs.id === ps.id)), ...currentSession]
     .sort((a, b) => b.startTime - a.startTime);
@@ -330,7 +348,7 @@ export function ContractionTimerCard() {
                 {allContractions.length > 0 ? (
                     <div className='p-2 space-y-2'>
                         {allContractions.map((c) => (
-                            <div key={c.id || c.startTime} className={`p-2 rounded-md ${currentSession.some(cs => cs.startTime === c.startTime) ? 'bg-secondary/80' : 'bg-secondary/30'} grid grid-cols-4 items-center text-sm gap-2`}>
+                            <div key={c.id || c.startTime} className={`p-2 rounded-md ${currentSession.some(cs => cs.startTime === c.startTime) ? 'bg-secondary/80' : 'bg-secondary/30'} grid grid-cols-[1fr,auto,auto,auto,auto] items-center text-sm gap-2`}>
                                 <div className='font-medium'>
                                     {isValid(new Date(c.startTime)) ? format(new Date(c.startTime), 'h:mm:ss a') : '--:--:--'}
                                 </div>
@@ -343,6 +361,27 @@ export function ContractionTimerCard() {
                                  <div className='text-muted-foreground'>
                                     Int: <span className='font-semibold text-foreground'>{c.intensity}</span>
                                 </div>
+                                {c.id && (
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Delete this entry?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. This will permanently delete this contraction from your history.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDeleteContraction(c.id!)}>Delete</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -363,3 +402,5 @@ export function ContractionTimerCard() {
     </Card>
   );
 }
+
+    

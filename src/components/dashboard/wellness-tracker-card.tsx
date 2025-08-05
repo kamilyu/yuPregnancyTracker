@@ -8,11 +8,9 @@ import { doc, onSnapshot, setDoc, Timestamp } from 'firebase/firestore';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
-import { Flame, Droplets, Pill, BedDouble, Battery, Footprints, Sparkles } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Flame, Droplets, Pill, BedDouble, Battery } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 
 type WellnessData = {
@@ -20,8 +18,6 @@ type WellnessData = {
     vitaminTaken: boolean;
     sleepQuality: number;
     energyLevel: number;
-    steps: number;
-    selfCare: string;
 };
 
 const defaultWellnessData: WellnessData = {
@@ -29,8 +25,6 @@ const defaultWellnessData: WellnessData = {
     vitaminTaken: false,
     sleepQuality: 3,
     energyLevel: 3,
-    steps: 0,
-    selfCare: "",
 };
 
 export function WellnessTrackerCard() {
@@ -38,8 +32,6 @@ export function WellnessTrackerCard() {
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
     const [wellnessData, setWellnessData] = useState<WellnessData>(defaultWellnessData);
-    const [debouncedSteps, setDebouncedSteps] = useState<string>('');
-    const [debouncedSelfCare, setDebouncedSelfCare] = useState<string>('');
 
 
     const todayId = useMemo(() => {
@@ -55,12 +47,8 @@ export function WellnessTrackerCard() {
             if (doc.exists()) {
                 const data = doc.data() as WellnessData
                 setWellnessData(data);
-                setDebouncedSteps(String(data.steps || ''));
-                setDebouncedSelfCare(data.selfCare || '');
             } else {
                 setWellnessData(defaultWellnessData);
-                setDebouncedSteps('');
-                setDebouncedSelfCare('');
             }
             setLoading(false);
         }, (err) => {
@@ -90,25 +78,6 @@ export function WellnessTrackerCard() {
         }
     }, [wellnessData, user, todayId, toast]);
     
-    // Debounced update for text inputs
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            if (user && debouncedSteps !== String(wellnessData.steps)) {
-                 updateWellnessData('steps', parseInt(debouncedSteps, 10) || 0, true);
-            }
-        }, 1000); 
-        return () => clearTimeout(handler);
-    }, [debouncedSteps, user, wellnessData.steps, updateWellnessData]);
-
-     useEffect(() => {
-        const handler = setTimeout(() => {
-            if (user && debouncedSelfCare !== wellnessData.selfCare) {
-                updateWellnessData('selfCare', debouncedSelfCare, true);
-            }
-        }, 1000);
-        return () => clearTimeout(handler);
-    }, [debouncedSelfCare, user, wellnessData.selfCare, updateWellnessData]);
-
 
     if (loading) {
         return (
@@ -132,7 +101,7 @@ export function WellnessTrackerCard() {
                 </CardTitle>
                 <CardDescription>Log your daily habits to stay healthy and strong.</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Column 1: Water & Vitamins */}
                 <div className="space-y-6">
                     <div className="space-y-2">
@@ -193,27 +162,6 @@ export function WellnessTrackerCard() {
                             <span></span>
                             <span>High</span>
                         </div>
-                    </div>
-                </div>
-                
-                {/* Column 3: Steps & Self-Care */}
-                 <div className="space-y-6">
-                    <div className="space-y-2">
-                        <h4 className="font-semibold flex items-center gap-2"><Footprints className="text-primary/80"/> Daily Steps</h4>
-                        <Input 
-                            type="number"
-                            placeholder="e.g., 5000"
-                            value={debouncedSteps}
-                            onChange={(e) => setDebouncedSteps(e.target.value)}
-                        />
-                    </div>
-                     <div className="space-y-2">
-                        <h4 className="font-semibold flex items-center gap-2"><Sparkles className="text-primary/80"/> Self-Care Moment</h4>
-                        <Input 
-                            placeholder="e.g., 5-min walk, deep breathing"
-                            value={debouncedSelfCare}
-                            onChange={(e) => setDebouncedSelfCare(e.target.value)}
-                        />
                     </div>
                 </div>
             </CardContent>

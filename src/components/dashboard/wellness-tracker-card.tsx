@@ -38,6 +38,9 @@ export function WellnessTrackerCard() {
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
     const [wellnessData, setWellnessData] = useState<WellnessData>(defaultWellnessData);
+    const [debouncedSteps, setDebouncedSteps] = useState<string>('');
+    const [debouncedSelfCare, setDebouncedSelfCare] = useState<string>('');
+
 
     const todayId = useMemo(() => {
         const d = new Date();
@@ -50,9 +53,14 @@ export function WellnessTrackerCard() {
         const docRef = doc(db, 'users', user.uid, 'dailyWellness', todayId);
         const unsubscribe = onSnapshot(docRef, (doc) => {
             if (doc.exists()) {
-                setWellnessData(doc.data() as WellnessData);
+                const data = doc.data() as WellnessData
+                setWellnessData(data);
+                setDebouncedSteps(String(data.steps || ''));
+                setDebouncedSelfCare(data.selfCare || '');
             } else {
                 setWellnessData(defaultWellnessData);
+                setDebouncedSteps('');
+                setDebouncedSelfCare('');
             }
             setLoading(false);
         }, (err) => {
@@ -64,22 +72,42 @@ export function WellnessTrackerCard() {
         return () => unsubscribe();
     }, [user, todayId, toast]);
 
-    const updateWellnessData = useCallback(async (field: keyof WellnessData, value: any) => {
+    const updateWellnessData = useCallback(async (field: keyof WellnessData, value: any, immediate = false) => {
         const newData = { ...wellnessData, [field]: value };
         setWellnessData(newData);
         
-        if (!user) return;
-        try {
-            const docRef = doc(db, 'users', user.uid, 'dailyWellness', todayId);
-            await setDoc(docRef, { 
-                ...newData,
-                date: Timestamp.now()
-            }, { merge: true });
-        } catch (error) {
-            console.error("Error updating wellness data:", error);
-            toast({ variant: 'destructive', title: 'Update Failed', description: `Could not save ${field}.` });
+        if (immediate && user) {
+            try {
+                const docRef = doc(db, 'users', user.uid, 'dailyWellness', todayId);
+                await setDoc(docRef, { 
+                    ...newData,
+                    date: Timestamp.now()
+                }, { merge: true });
+            } catch (error) {
+                console.error("Error updating wellness data:", error);
+                toast({ variant: 'destructive', title: 'Update Failed', description: `Could not save ${field}.` });
+            }
         }
     }, [wellnessData, user, todayId, toast]);
+    
+    // Debounced update for text inputs
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            if (user && debouncedSteps !== String(wellnessData.steps)) {
+                 updateWellnessData('steps', parseInt(debouncedSteps, 10) || 0, true);
+            }
+        }, 1000); 
+        return () => clearTimeout(handler);
+    }, [debouncedSteps, user, wellnessData.steps, updateWellnessData]);
+
+     useEffect(() => {
+        const handler = setTimeout(() => {
+            if (user && debouncedSelfCare !== wellnessData.selfCare) {
+                updateWellnessData('selfCare', debouncedSelfCare, true);
+            }
+        }, 1000);
+        return () => clearTimeout(handler);
+    }, [debouncedSelfCare, user, wellnessData.selfCare, updateWellnessData]);
 
 
     if (loading) {
@@ -110,9 +138,9 @@ export function WellnessTrackerCard() {
                     <div className="space-y-2">
                         <h4 className="font-semibold flex items-center gap-2"><Droplets className="text-primary/80"/> Water Intake</h4>
                         <div className='flex items-center gap-2'>
-                           <Button variant="outline" size="icon" onClick={() => updateWellnessData('waterGlasses', Math.max(0, wellnessData.waterGlasses - 1))}>-</Button>
+                           <Button variant="outline" size="icon" onClick={() => updateWellnessData('waterGlasses', Math.max(0, wellnessData.waterGlasses - 1), true)}>-</Button>
                            <span className='font-bold text-lg w-12 text-center'>{wellnessData.waterGlasses}</span>
-                           <Button variant="outline" size="icon" onClick={() => updateWellnessData('waterGlasses', wellnessData.waterGlasses + 1)}>+</Button>
+                           <Button variant="outline" size="icon" onClick={() => updateWellnessData('waterGlasses', wellnessData.waterGlasses + 1, true)}>+</Button>
                            <span className='text-muted-foreground'>/ 8 glasses</span>
                         </div>
                     </div>
@@ -121,7 +149,7 @@ export function WellnessTrackerCard() {
                             <Checkbox 
                                 id="vitaminTaken"
                                 checked={wellnessData.vitaminTaken}
-                                onCheckedChange={(checked) => updateWellnessData('vitaminTaken', checked)}
+                                onCheckedChange={(checked) => updateWellnessData('vitaminTaken', checked, true)}
                             />
                             <label htmlFor="vitaminTaken" className="font-semibold flex items-center gap-2">
                                 <Pill className="text-primary/80"/> Took Prenatal Vitamin
@@ -135,10 +163,11 @@ export function WellnessTrackerCard() {
                     <div className="space-y-2">
                         <h4 className="font-semibold flex items-center gap-2"><BedDouble className="text-primary/80"/> Sleep Quality</h4>
                         <Slider 
-                            defaultValue={[wellnessData.sleepQuality]} 
+                            value={[wellnessData.sleepQuality]} 
                             max={5} 
                             step={1} 
-                            onValueCommit={(value) => updateWellnessData('sleepQuality', value[0])}
+                            onValueChange={(value) => updateWellnessData('sleepQuality', value[0])}
+                            onValueCommit={(value) => updateWellnessData('sleepQuality', value[0], true)}
                         />
                          <div className="flex justify-between text-xs text-muted-foreground">
                             <span>Poor</span>
@@ -151,10 +180,11 @@ export function WellnessTrackerCard() {
                      <div className="space-y-2">
                         <h4 className="font-semibold flex items-center gap-2"><Battery className="text-primary/80"/> Energy Level</h4>
                         <Slider 
-                            defaultValue={[wellnessData.energyLevel]} 
+                            value={[wellnessData.energyLevel]} 
                             max={5} 
                             step={1} 
-                            onValueCommit={(value) => updateWellnessData('energyLevel', value[0])}
+                            onValueChange={(value) => updateWellnessData('energyLevel', value[0])}
+                            onValueCommit={(value) => updateWellnessData('energyLevel', value[0], true)}
                         />
                          <div className="flex justify-between text-xs text-muted-foreground">
                             <span>Low</span>
@@ -173,16 +203,16 @@ export function WellnessTrackerCard() {
                         <Input 
                             type="number"
                             placeholder="e.g., 5000"
-                            defaultValue={wellnessData.steps || ''}
-                            onBlur={(e) => updateWellnessData('steps', parseInt(e.target.value, 10) || 0)}
+                            value={debouncedSteps}
+                            onChange={(e) => setDebouncedSteps(e.target.value)}
                         />
                     </div>
                      <div className="space-y-2">
                         <h4 className="font-semibold flex items-center gap-2"><Sparkles className="text-primary/80"/> Self-Care Moment</h4>
                         <Input 
                             placeholder="e.g., 5-min walk, deep breathing"
-                            defaultValue={wellnessData.selfCare || ''}
-                            onBlur={(e) => updateWellnessData('selfCare', e.target.value)}
+                            value={debouncedSelfCare}
+                            onChange={(e) => setDebouncedSelfCare(e.target.value)}
                         />
                     </div>
                 </div>

@@ -243,6 +243,3 @@ export function DailyJournalCard() {
         </Card>
     )
 }
-
-
-    

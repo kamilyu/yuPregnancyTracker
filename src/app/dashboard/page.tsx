@@ -13,7 +13,6 @@ import { db } from "@/lib/firebase";
 import { DueDateCard } from "@/components/dashboard/due-date-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { DailyJournalCard } from "@/components/dashboard/daily-journal-card";
-import { DailyUpdateCard } from "@/components/dashboard/daily-update-card";
 import { WeeklyUpdateCard } from "@/components/dashboard/weekly-update-card";
 
 function DashboardPage() {
@@ -97,8 +96,6 @@ function DashboardPage() {
             </div>
 
             <DailyJournalCard />
-            
-            <DailyUpdateCard currentWeek={currentWeek} dayOfPregnancy={dayOfPregnancy} />
             
             <WeeklyUpdateCard currentWeek={currentWeek} />
 

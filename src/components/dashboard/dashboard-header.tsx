@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
@@ -57,7 +57,7 @@ export function DashboardHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-9 w-9">
-                <AvatarImage src={user?.photoURL ?? ''} alt={user?.displayName ?? 'User avatar'} />
+                <AvatarImage src={user?.photoURL ?? undefined} alt={user?.displayName ?? 'User avatar'} />
                 <AvatarFallback>
                   {user ? getInitials(user.displayName) : <User />}
                 </AvatarFallback>

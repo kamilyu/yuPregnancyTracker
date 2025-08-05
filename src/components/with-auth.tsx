@@ -13,7 +13,7 @@ const withAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) =>
 
     useEffect(() => {
       if (!loading && !user) {
-        router.replace('/login');
+        router.replace('/');
       }
     }, [user, loading, router]);
 

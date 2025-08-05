@@ -72,29 +72,29 @@ function DashboardPage() {
             </div>
         ) : (
           <>
-            <Card>
-                <CardContent className="grid grid-cols-3 gap-4 text-center pt-6">
-                     <div>
-                        <p className="text-3xl font-bold text-primary">{currentWeek}</p>
-                        <p className="text-sm text-muted-foreground">Week</p>
-                    </div>
-                    <div>
-                        <p className="text-3xl font-bold text-primary">{daysRemaining > 0 ? daysRemaining : 0}</p>
-                        <p className="text-sm text-muted-foreground">Days Left</p>
-                    </div>
-                    <div>
-                        <p className="text-3xl font-bold text-primary">{currentTrimester}</p>
-                        <p className="text-sm text-muted-foreground">Trimester</p>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <DailyJournalCard />
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <SizeVizCard currentWeek={currentWeek} />
-                <WeeklyUpdateCard currentWeek={currentWeek} />
+                 <Card>
+                    <CardContent className="grid grid-cols-3 gap-4 text-center pt-6 h-full content-center">
+                        <div>
+                            <p className="text-3xl font-bold text-primary">{currentWeek}</p>
+                            <p className="text-sm text-muted-foreground">Week</p>
+                        </div>
+                        <div>
+                            <p className="text-3xl font-bold text-primary">{daysRemaining > 0 ? daysRemaining : 0}</p>
+                            <p className="text-sm text-muted-foreground">Days Left</p>
+                        </div>
+                        <div>
+                            <p className="text-3xl font-bold text-primary">{currentTrimester}</p>
+                            <p className="text-sm text-muted-foreground">Trimester</p>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
+
+            <DailyJournalCard />
+            
+            <WeeklyUpdateCard currentWeek={currentWeek} />
             
             <div className="grid grid-cols-1 gap-6">
                 <TaskListCard currentTrimester={currentTrimester} />

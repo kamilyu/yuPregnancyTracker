@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { weeklySizeComparisons } from "@/data/pregnancy-data";
+import { Separator } from "../ui/separator";
 
 type SizeVizCardProps = {
   currentWeek: number;
@@ -37,6 +38,20 @@ export function SizeVizCard({ currentWeek }: SizeVizCardProps) {
           Your baby is about the size of a
         </p>
         <p className="text-2xl font-bold text-primary">{comparison.item}</p>
+        
+        <Separator className="my-4" />
+
+        <div className="grid grid-cols-2 gap-4 w-full text-center">
+            <div>
+                <p className="text-xl font-bold text-primary">{comparison.height}</p>
+                <p className="text-sm text-muted-foreground">Est. Height</p>
+            </div>
+            <div>
+                <p className="text-xl font-bold text-primary">{comparison.weight}</p>
+                <p className="text-sm text-muted-foreground">Est. Weight</p>
+            </div>
+        </div>
+
       </CardContent>
     </Card>
   );

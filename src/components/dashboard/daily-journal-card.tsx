@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { Flame, PenSquare, Sparkles } from 'lucide-react';
+import { Flame, PenSquare, Sparkles, Trophy } from 'lucide-react';
 import { moods, symptoms } from '@/data/journal-data';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
@@ -23,7 +23,6 @@ type JournalEntry = {
     mood: string | null;
     symptoms: string[];
     journalText: string;
-    streak: number;
 };
 
 export function DailyJournalCard() {
@@ -32,6 +31,7 @@ export function DailyJournalCard() {
     const [loading, setLoading] = useState(true);
 
     const [currentStreak, setCurrentStreak] = useState(0);
+    const [longestStreak, setLongestStreak] = useState(0);
     const [todaysEntry, setTodaysEntry] = useState<Partial<JournalEntry> | null>(null);
 
     const [selectedMood, setSelectedMood] = useState<string | null>(null);
@@ -76,6 +76,7 @@ export function DailyJournalCard() {
         const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
             const data = doc.data();
             setCurrentStreak(data?.journalStreak || 0);
+            setLongestStreak(data?.longestJournalStreak || 0);
         });
 
         setLoading(false);
@@ -106,28 +107,36 @@ export function DailyJournalCard() {
             const journalDocRef = doc(db, 'users', user.uid, 'dailyJournal', todayId);
             const userDocSnap = await getDoc(userDocRef);
             
-            let newStreak = userDocSnap.data()?.journalStreak || 0;
+            let currentStreak = userDocSnap.data()?.journalStreak || 0;
+            let longestStreak = userDocSnap.data()?.longestJournalStreak || 0;
             const lastEntryDate = userDocSnap.data()?.lastJournalEntry?.toDate();
-
-            if (!todaysEntry) { // Only update streak on first save of the day
+            
+            // This check ensures we only update the streak once per day, on the first save.
+            if (!todaysEntry) { 
                 if (lastEntryDate && isYesterday(lastEntryDate)) {
-                    newStreak += 1; // Continue streak
+                    currentStreak++; // Continue streak
                 } else if (!lastEntryDate || !isToday(lastEntryDate)) {
-                    newStreak = 1; // Start new streak
+                    currentStreak = 1; // Start new streak if it's not today or yesterday
                 }
             }
 
+            if(currentStreak > longestStreak) {
+                longestStreak = currentStreak;
+            }
 
             const entryData: Omit<JournalEntry, 'id'> = {
                 date: Timestamp.now(),
                 mood: selectedMood,
                 symptoms: selectedSymptoms,
                 journalText: journalText,
-                streak: newStreak
             };
 
             batch.set(journalDocRef, entryData, { merge: true });
-            batch.set(userDocRef, { journalStreak: newStreak, lastJournalEntry: Timestamp.now() }, { merge: true });
+            batch.update(userDocRef, { 
+                journalStreak: currentStreak, 
+                longestJournalStreak: longestStreak,
+                lastJournalEntry: Timestamp.now() 
+            });
 
             await batch.commit();
 
@@ -157,12 +166,21 @@ export function DailyJournalCard() {
                     <h3 className="font-headline text-xl">Daily Check-in</h3>
                     <p className="text-muted-foreground text-sm">How are you feeling today?</p>
                 </div>
-                <div className="text-center">
-                    <div className="flex items-center justify-center text-primary gap-1">
-                        <Flame className="w-6 h-6"/>
-                        <span className="text-3xl font-bold">{currentStreak}</span>
+                <div className="flex gap-4">
+                    <div className="text-center">
+                        <div className="flex items-center justify-center text-primary gap-1">
+                            <Flame className="w-6 h-6"/>
+                            <span className="text-3xl font-bold">{currentStreak}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground -mt-1">Day Streak</p>
                     </div>
-                    <p className="text-xs text-muted-foreground -mt-1">Day Streak</p>
+                     <div className="text-center">
+                        <div className="flex items-center justify-center text-primary/80 gap-1">
+                            <Trophy className="w-6 h-6"/>
+                            <span className="text-3xl font-bold">{longestStreak}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground -mt-1">Longest</p>
+                    </div>
                 </div>
             </div>
             <CardContent className="p-4 sm:p-6 grid gap-4 md:grid-cols-2">
@@ -225,3 +243,6 @@ export function DailyJournalCard() {
         </Card>
     )
 }
+
+
+    

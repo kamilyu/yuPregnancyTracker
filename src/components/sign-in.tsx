@@ -37,6 +37,9 @@ export function SignIn() {
           createdAt: serverTimestamp(),
           dueDate: null,
           pregnancyStartDate: null,
+          journalStreak: 0,
+          longestJournalStreak: 0,
+          lastJournalEntry: null
         });
       }
       
@@ -81,3 +84,5 @@ export function SignIn() {
     </div>
   );
 }
+
+    

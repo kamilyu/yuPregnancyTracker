@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, doc, onSnapshot, setDoc, query, orderBy, limit, writeBatch, Timestamp } from 'firebase/firestore';
+import { collection, doc, onSnapshot, setDoc, query, orderBy, limit, writeBatch, Timestamp, getDoc } from 'firebase/firestore';
 import { isToday, isYesterday, startOfDay, subDays } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -187,25 +187,23 @@ export function DailyJournalCard() {
                     </div>
                     <div className="space-y-2">
                          <h4 className="font-semibold text-sm">Any symptoms?</h4>
-                         <ScrollArea className="h-32">
-                             <div className="space-y-2 pr-4">
-                                {symptoms.map(symptom => (
-                                    <div key={symptom} className="flex items-center space-x-2">
-                                        <Checkbox 
-                                            id={`symptom-${symptom}`}
-                                            checked={selectedSymptoms.includes(symptom)}
-                                            onCheckedChange={() => handleSymptomChange(symptom)}
-                                        />
-                                        <label
-                                            htmlFor={`symptom-${symptom}`}
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                        >
-                                            {symptom}
-                                        </label>
-                                    </div>
-                                ))}
-                             </div>
-                         </ScrollArea>
+                         <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                            {symptoms.map(symptom => (
+                                <div key={symptom} className="flex items-center space-x-2">
+                                    <Checkbox 
+                                        id={`symptom-${symptom}`}
+                                        checked={selectedSymptoms.includes(symptom)}
+                                        onCheckedChange={() => handleSymptomChange(symptom)}
+                                    />
+                                    <label
+                                        htmlFor={`symptom-${symptom}`}
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        {symptom}
+                                    </label>
+                                </div>
+                            ))}
+                         </div>
                     </div>
                 </div>
                  <div className="space-y-4 flex flex-col">

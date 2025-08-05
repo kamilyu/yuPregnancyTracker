@@ -1,13 +1,12 @@
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 
 export function StorkLogo({ light = false }: { light?: boolean }) {
   return (
-    <Link href="/" className="flex items-center gap-2 group">
+    <div className="flex items-center gap-2 group">
       <div
         className={cn(
-          "p-2 rounded-full bg-primary/20 group-hover:bg-primary/30 transition-colors",
-          light ? "bg-white/20 group-hover:bg-white/30" : ""
+          "p-2 rounded-full bg-primary/20 transition-colors",
+          light ? "bg-white/20" : ""
         )}
       >
         <svg
@@ -54,6 +53,6 @@ export function StorkLogo({ light = false }: { light?: boolean }) {
       >
         StorkWatch
       </span>
-    </Link>
+    </div>
   );
 }

@@ -39,7 +39,8 @@ export function SignIn() {
           pregnancyStartDate: null,
           journalStreak: 0,
           longestJournalStreak: 0,
-          lastJournalEntry: null
+          lastJournalEntry: null,
+          unitPreference: 'imperial'
         });
       }
       
@@ -84,5 +85,3 @@ export function SignIn() {
     </div>
   );
 }
-
-    

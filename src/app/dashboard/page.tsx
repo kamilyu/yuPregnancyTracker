@@ -17,10 +17,14 @@ import { WeeklyUpdateCard } from "@/components/dashboard/weekly-update-card";
 import { WellnessTrackerCard } from "@/components/dashboard/wellness-tracker-card";
 import { Separator } from "@/components/ui/separator";
 
+type UnitPreference = 'imperial' | 'metric';
+
 function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
+  const [unitPreference, setUnitPreference] = useState<UnitPreference>('imperial');
+
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -32,6 +36,9 @@ function DashboardPage() {
           const data = userDoc.data();
           if (data.dueDate && data.dueDate.toDate) {
             setDueDate(data.dueDate.toDate());
+          }
+          if (data.unitPreference) {
+            setUnitPreference(data.unitPreference);
           }
         }
         setLoading(false);
@@ -78,7 +85,7 @@ function DashboardPage() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <SizeVizCard currentWeek={currentWeek} />
+                <SizeVizCard currentWeek={currentWeek} unitPreference={unitPreference} setUnitPreference={setUnitPreference} />
                  <Card>
                     <CardContent className="flex justify-around items-center text-center pt-6 h-full">
                         <div className="flex flex-col items-center justify-center">

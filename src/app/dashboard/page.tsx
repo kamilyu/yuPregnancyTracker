@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { differenceInWeeks, subWeeks, format, differenceInDays } from "date-fns";
 import { SizeVizCard } from "@/components/dashboard/size-viz-card";
 import { TaskListCard } from "@/components/dashboard/task-list-card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calendar, Hourglass, Layers } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import withAuth from "@/components/with-auth";
 import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DailyJournalCard } from "@/components/dashboard/daily-journal-card";
 import { WeeklyUpdateCard } from "@/components/dashboard/weekly-update-card";
 import { WellnessTrackerCard } from "@/components/dashboard/wellness-tracker-card";
+import { Separator } from "@/components/ui/separator";
 
 function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -80,15 +81,24 @@ function DashboardPage() {
                 <SizeVizCard currentWeek={currentWeek} />
                  <Card>
                     <CardContent className="grid grid-cols-3 gap-4 text-center pt-6 h-full content-center">
-                        <div>
+                        <div className="flex flex-col items-center justify-center">
+                             <Calendar className="w-6 h-6 mb-2 text-primary/80" />
                             <p className="text-3xl font-bold text-primary">{currentWeek}</p>
                             <p className="text-sm text-muted-foreground">Week</p>
                         </div>
-                        <div>
+                         <div className="flex items-center">
+                            <Separator orientation="vertical" />
+                        </div>
+                        <div className="flex flex-col items-center justify-center">
+                            <Hourglass className="w-6 h-6 mb-2 text-primary/80" />
                             <p className="text-3xl font-bold text-primary">{daysRemaining > 0 ? daysRemaining : 0}</p>
                             <p className="text-sm text-muted-foreground">Days Left</p>
                         </div>
-                        <div>
+                         <div className="flex items-center">
+                            <Separator orientation="vertical" />
+                        </div>
+                        <div className="flex flex-col items-center justify-center">
+                            <Layers className="w-6 h-6 mb-2 text-primary/80" />
                             <p className="text-3xl font-bold text-primary">{currentTrimester}</p>
                             <p className="text-sm text-muted-foreground">Trimester</p>
                         </div>

@@ -13,6 +13,7 @@ import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { DueDateCard } from "@/components/dashboard/due-date-card";
 import { Card, CardContent } from "@/components/ui/card";
+import { DailyJournalCard } from "@/components/dashboard/daily-journal-card";
 
 function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -87,6 +88,8 @@ function DashboardPage() {
                     </div>
                 </CardContent>
             </Card>
+
+            <DailyJournalCard />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <SizeVizCard currentWeek={currentWeek} />

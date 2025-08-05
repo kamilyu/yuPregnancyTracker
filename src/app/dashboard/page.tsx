@@ -4,7 +4,6 @@
 import { useState, useEffect } from "react";
 import { differenceInWeeks, subWeeks, format, differenceInDays } from "date-fns";
 import { SizeVizCard } from "@/components/dashboard/size-viz-card";
-import { WeeklyUpdateCard } from "@/components/dashboard/weekly-update-card";
 import { TaskListCard } from "@/components/dashboard/task-list-card";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
@@ -14,6 +13,7 @@ import { db } from "@/lib/firebase";
 import { DueDateCard } from "@/components/dashboard/due-date-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { DailyJournalCard } from "@/components/dashboard/daily-journal-card";
+import { DailyUpdateCard } from "@/components/dashboard/daily-update-card";
 
 function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -63,6 +63,9 @@ function DashboardPage() {
   const currentWeek = dueDate ? 40 - differenceInWeeks(dueDate, today) : 1;
   const daysRemaining = dueDate ? differenceInDays(dueDate, today) : 280;
   const currentTrimester = currentWeek <= 13 ? 1 : currentWeek <= 27 ? 2 : 3;
+  const pregnancyStartDate = dueDate ? subWeeks(dueDate, 40) : new Date();
+  const dayOfPregnancy = differenceInDays(today, pregnancyStartDate);
+
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
@@ -94,7 +97,7 @@ function DashboardPage() {
 
             <DailyJournalCard />
             
-            <WeeklyUpdateCard currentWeek={currentWeek} />
+            <DailyUpdateCard currentWeek={currentWeek} dayOfPregnancy={dayOfPregnancy} />
             
             <div className="grid grid-cols-1 gap-6">
                 <TaskListCard currentTrimester={currentTrimester} />

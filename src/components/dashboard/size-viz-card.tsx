@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { weeklySizeComparisons } from "@/data/pregnancy-data";
 import { Separator } from "../ui/separator";
+import { Ruler, Weight } from "lucide-react";
 
 type SizeVizCardProps = {
   currentWeek: number;
@@ -43,10 +44,12 @@ export function SizeVizCard({ currentWeek }: SizeVizCardProps) {
 
         <div className="grid grid-cols-2 gap-4 w-full text-center">
             <div>
+                <Ruler className="mx-auto mb-1 h-5 w-5 text-primary/80" />
                 <p className="text-xl font-bold text-primary">{comparison.height}</p>
                 <p className="text-sm text-muted-foreground">Est. Height</p>
             </div>
             <div>
+                 <Weight className="mx-auto mb-1 h-5 w-5 text-primary/80" />
                 <p className="text-xl font-bold text-primary">{comparison.weight}</p>
                 <p className="text-sm text-muted-foreground">Est. Weight</p>
             </div>

@@ -14,6 +14,7 @@ import { DueDateCard } from "@/components/dashboard/due-date-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { DailyJournalCard } from "@/components/dashboard/daily-journal-card";
 import { DailyUpdateCard } from "@/components/dashboard/daily-update-card";
+import { WeeklyUpdateCard } from "@/components/dashboard/weekly-update-card";
 
 function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -99,6 +100,8 @@ function DashboardPage() {
             
             <DailyUpdateCard currentWeek={currentWeek} dayOfPregnancy={dayOfPregnancy} />
             
+            <WeeklyUpdateCard currentWeek={currentWeek} />
+
             <div className="grid grid-cols-1 gap-6">
                 <TaskListCard currentTrimester={currentTrimester} />
             </div>

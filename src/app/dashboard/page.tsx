@@ -80,23 +80,19 @@ function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <SizeVizCard currentWeek={currentWeek} />
                  <Card>
-                    <CardContent className="grid grid-cols-3 gap-4 text-center pt-6 h-full content-center">
+                    <CardContent className="flex justify-around items-center text-center pt-6 h-full">
                         <div className="flex flex-col items-center justify-center">
                              <Calendar className="w-6 h-6 mb-2 text-primary/80" />
                             <p className="text-3xl font-bold text-primary">{currentWeek}</p>
                             <p className="text-sm text-muted-foreground">Week</p>
                         </div>
-                         <div className="flex items-center">
-                            <Separator orientation="vertical" />
-                        </div>
+                         <Separator orientation="vertical" className="h-16" />
                         <div className="flex flex-col items-center justify-center">
                             <Hourglass className="w-6 h-6 mb-2 text-primary/80" />
                             <p className="text-3xl font-bold text-primary">{daysRemaining > 0 ? daysRemaining : 0}</p>
                             <p className="text-sm text-muted-foreground">Days Left</p>
                         </div>
-                         <div className="flex items-center">
-                            <Separator orientation="vertical" />
-                        </div>
+                         <Separator orientation="vertical" className="h-16" />
                         <div className="flex flex-col items-center justify-center">
                             <Layers className="w-6 h-6 mb-2 text-primary/80" />
                             <p className="text-3xl font-bold text-primary">{currentTrimester}</p>

@@ -2,12 +2,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { differenceInWeeks, subWeeks } from "date-fns";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { DueDateCard } from "@/components/dashboard/due-date-card";
+import { differenceInWeeks, subWeeks, format, differenceInDays } from "date-fns";
 import { SizeVizCard } from "@/components/dashboard/size-viz-card";
 import { WeeklyUpdateCard } from "@/components/dashboard/weekly-update-card";
-import { SymptomLogCard } from "@/components/dashboard/symptom-log-card";
 import { TaskListCard } from "@/components/dashboard/task-list-card";
 import { KickCounterCard } from "@/components/dashboard/kick-counter-card";
 import { ContractionTimerCard } from "@/components/dashboard/contraction-timer-card";
@@ -17,6 +14,8 @@ import { useAuth } from "@/context/auth-context";
 import withAuth from "@/components/with-auth";
 import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { DueDateCard } from "@/components/dashboard/due-date-card";
+import { Card, CardContent } from "@/components/ui/card";
 
 function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -44,8 +43,6 @@ function DashboardPage() {
   const handleSetDueDate = async (date: Date | null) => {
     if (user && date) {
         const userDocRef = doc(db, 'users', user.uid);
-        // The `date` received is the calculated due date.
-        // The pregnancy start date is 40 weeks before the due date.
         const pregnancyStartDate = subWeeks(date, 40);
         await setDoc(userDocRef, { 
             dueDate: Timestamp.fromDate(date),
@@ -66,37 +63,50 @@ function DashboardPage() {
 
   const today = new Date();
   const currentWeek = dueDate ? 40 - differenceInWeeks(dueDate, today) : 1;
+  const daysRemaining = dueDate ? differenceInDays(dueDate, today) : 280;
   const currentTrimester = currentWeek <= 13 ? 1 : currentWeek <= 27 ? 2 : 3;
 
   return (
-    <div className="min-h-screen bg-secondary/30">
-      <DashboardHeader />
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8">
-        {!dueDate ? (
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+       {!dueDate ? (
             <div className="max-w-md mx-auto">
                  <DueDateCard dueDate={dueDate} setDueDate={handleSetDueDate} />
             </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-3">
-                <DueDateCard dueDate={dueDate} setDueDate={handleSetDueDate} />
+          <>
+            <Card>
+                <CardContent className="grid grid-cols-3 gap-4 text-center pt-6">
+                     <div>
+                        <p className="text-3xl font-bold text-primary">{currentWeek}</p>
+                        <p className="text-sm text-muted-foreground">Week</p>
+                    </div>
+                    <div>
+                        <p className="text-3xl font-bold text-primary">{daysRemaining > 0 ? daysRemaining : 0}</p>
+                        <p className="text-sm text-muted-foreground">Days Left</p>
+                    </div>
+                    <div>
+                        <p className="text-3xl font-bold text-primary">{currentTrimester}</p>
+                        <p className="text-sm text-muted-foreground">Trimester</p>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <SizeVizCard currentWeek={currentWeek} />
+                <WeeklyUpdateCard currentWeek={currentWeek} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <WeightTrackerCard />
+                <KickCounterCard />
             </div>
             
-            <div className="lg:col-span-1 space-y-6">
-                <SizeVizCard currentWeek={currentWeek} />
+            <div className="grid grid-cols-1 gap-6">
+                <ContractionTimerCard />
                 <TaskListCard currentTrimester={currentTrimester} />
             </div>
-            
-            <div className="lg:col-span-2 space-y-6">
-                 <WeeklyUpdateCard currentWeek={currentWeek} />
-                 <WeightTrackerCard />
-                 <ContractionTimerCard />
-                 <KickCounterCard />
-                 <SymptomLogCard />
-            </div>
-          </div>
+         </>
         )}
-      </main>
     </div>
   );
 }

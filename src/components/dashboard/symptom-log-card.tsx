@@ -40,7 +40,7 @@ export function SymptomLogCard() {
     const q = query(
         collection(db, 'users', user.uid, 'symptomLogs'), 
         orderBy('createdAt', 'desc'), 
-        limit(20)
+        limit(50)
     );
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -99,7 +99,7 @@ export function SymptomLogCard() {
   };
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col h-[calc(100vh-12rem)]">
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
             <NotebookText className="text-primary"/>
@@ -119,31 +119,33 @@ export function SymptomLogCard() {
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Log Entry
         </Button>
-        <div className="flex-grow mt-4">
+        <div className="flex-grow mt-4 flex flex-col">
           <h4 className="font-semibold mb-2">Recent Entries</h4>
-          <ScrollArea className="h-48 pr-4 border-t">
-            {loading ? (
-                <div className="space-y-4 py-4">
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                </div>
-            ) : logEntries.length > 0 ? (
-                <div className="space-y-4 py-4">
-                    {logEntries.map((entry) => (
-                        <div key={entry.id} className="text-sm p-2 rounded-md bg-secondary/30">
-                            <p className="font-semibold">{format(entry.date, 'MMMM d, yyyy - h:mm a')}</p>
-                            <p className="text-muted-foreground whitespace-pre-wrap">{entry.notes}</p>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <div className="text-center text-muted-foreground pt-10">
-                    <p>No entries yet.</p>
-                    <p>Add a note to start your journal.</p>
-                </div>
-            )}
-          </ScrollArea>
+          <div className="relative flex-grow">
+            <ScrollArea className="absolute inset-0 pr-4">
+              {loading ? (
+                  <div className="space-y-4 py-4">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                  </div>
+              ) : logEntries.length > 0 ? (
+                  <div className="space-y-4 py-4">
+                      {logEntries.map((entry) => (
+                          <div key={entry.id} className="text-sm p-2 rounded-md bg-secondary/30">
+                              <p className="font-semibold">{format(entry.date, 'MMMM d, yyyy - h:mm a')}</p>
+                              <p className="text-muted-foreground whitespace-pre-wrap">{entry.notes}</p>
+                          </div>
+                      ))}
+                  </div>
+              ) : (
+                  <div className="text-center text-muted-foreground pt-10">
+                      <p>No entries yet.</p>
+                      <p>Add a note to start your journal.</p>
+                  </div>
+              )}
+            </ScrollArea>
+          </div>
         </div>
       </CardContent>
     </Card>

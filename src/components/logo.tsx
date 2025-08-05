@@ -51,7 +51,7 @@ export function StorkLogo({ light = false }: { light?: boolean }) {
           light ? "text-white" : ""
         )}
       >
-        StorkWatch
+        yuPregnancy
       </span>
     </div>
   );

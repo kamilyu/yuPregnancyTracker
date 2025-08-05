@@ -41,7 +41,7 @@ function formatDuration(seconds: number) {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-const LOCAL_STORAGE_KEY = 'storkwatch_contraction_session';
+const LOCAL_STORAGE_KEY = 'yupregnancy_contraction_session';
 
 export function ContractionTimerCard() {
   const { user } = useAuth();

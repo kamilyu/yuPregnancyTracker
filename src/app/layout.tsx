@@ -18,7 +18,7 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "StorkWatch",
+  title: "yuPregnancy",
   description:
     "Your personal guide through the magical journey of pregnancy.",
 };

@@ -53,7 +53,7 @@ export function DueDateCard({ dueDate, setDueDate }: DueDateCardProps) {
         return (
             <Card className="flex flex-col items-center justify-center text-center p-8 bg-secondary">
                  <CalendarIcon className="w-12 h-12 text-primary mb-4" />
-                 <h3 className="text-xl font-headline font-semibold">Welcome to StorkWatch!</h3>
+                 <h3 className="text-xl font-headline font-semibold">Welcome to yuPregnancy!</h3>
                  <p className="text-muted-foreground mt-2 mb-4">Let's calculate your due date to get started.</p>
                  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogTrigger asChild>

@@ -69,7 +69,7 @@ export function SignIn() {
           <div className="inline-block mb-4">
             <StorkLogo />
           </div>
-          <h1 className="text-3xl font-headline font-bold">Welcome to StorkWatch</h1>
+          <h1 className="text-3xl font-headline font-bold">Welcome to yuPregnancy</h1>
           <p className="text-muted-foreground">Sign in with Google to begin your journey.</p>
         </div>
         <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-8 text-center">

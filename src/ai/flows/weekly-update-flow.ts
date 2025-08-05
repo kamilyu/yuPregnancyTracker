@@ -21,6 +21,7 @@ const prompt = ai.definePrompt({
     
     Provide scientifically verified details about the baby's growth milestones, organ development, and any other expected changes for this specific week.
     The tone should be positive, reassuring, and exciting.
+    The output should be structured as a list of key developments.
     `,
 });
 

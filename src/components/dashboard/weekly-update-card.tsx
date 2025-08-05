@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Sparkles, Baby } from "lucide-react";
+import { Sparkles, Baby, Ruler, Heart, ToyBrick } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { getWeeklyUpdate } from "@/ai/flows/weekly-update-flow";
@@ -58,18 +58,36 @@ export function WeeklyUpdateCard({ currentWeek }: WeeklyUpdateCardProps) {
       <CardContent>
         {isPending ? (
           <div className="space-y-3">
-            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-6 w-3/4" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-4/6" />
           </div>
         ) : updateData ? (
-          <div>
+          <div className="space-y-3">
             <h4 className="font-semibold text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-primary/80" />
               {updateData.title}
             </h4>
-            <p className="mt-2 text-muted-foreground">{updateData.description}</p>
+            <ul className="space-y-2 text-muted-foreground text-sm">
+                <li className="flex items-start gap-3">
+                    <Ruler className="w-4 h-4 mt-0.5 shrink-0 text-primary/80" />
+                    <span>Your baby is now the size of a {updateData.sizeComparison}.</span>
+                </li>
+                 <li className="flex items-start gap-3">
+                    <ToyBrick className="w-4 h-4 mt-0.5 shrink-0 text-primary/80" />
+                    <span>{updateData.physicalDevelopment}</span>
+                </li>
+                 <li className="flex items-start gap-3">
+                    <Heart className="w-4 h-4 mt-0.5 shrink-0 text-primary/80" />
+                    <span>{updateData.organDevelopment}</span>
+                </li>
+                 <li className="flex items-start gap-3">
+                    <Sparkles className="w-4 h-4 mt-0.5 shrink-0 text-primary/80" />
+                    <span>{updateData.notableChanges}</span>
+                </li>
+            </ul>
           </div>
         ) : (
             <div className="text-center text-muted-foreground p-4">

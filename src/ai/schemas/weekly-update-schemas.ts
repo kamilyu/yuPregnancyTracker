@@ -16,7 +16,10 @@ export const WeeklyUpdateInputSchema = z.object({
 export type WeeklyUpdateInput = z.infer<typeof WeeklyUpdateInputSchema>;
 
 export const WeeklyUpdateOutputSchema = z.object({
-    title: z.string().describe("A catchy, exciting title for the weekly update. Should include the week number."),
-    description: z.string().describe("A detailed, yet easy-to-understand summary of the baby's development for the given week. Should be a paragraph of 3-5 sentences. It should be scientifically-backed, covering growth milestones, organ development, and expected changes."),
+    title: z.string().describe("A catchy, exciting title for the weekly update. Should include the week number. e.g. \"Week 8: Tiny Fingers and Toes!\""),
+    sizeComparison: z.string().describe("A comparison of the baby's size to a fruit or vegetable, including the approximate length. e.g. \"a raspberry (about 0.6 inches)\""),
+    physicalDevelopment: z.string().describe("A bullet point describing the baby's external physical developments for the week."),
+    organDevelopment: z.string().describe("A bullet point describing the baby's internal organ and system developments for the week."),
+    notableChanges: z.string().describe("A friendly and encouraging closing statement about the week's progress."),
 });
 export type WeeklyUpdateOutput = z.infer<typeof WeeklyUpdateOutputSchema>;

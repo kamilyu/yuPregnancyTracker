@@ -6,9 +6,6 @@ import { differenceInWeeks, subWeeks, format, differenceInDays } from "date-fns"
 import { SizeVizCard } from "@/components/dashboard/size-viz-card";
 import { WeeklyUpdateCard } from "@/components/dashboard/weekly-update-card";
 import { TaskListCard } from "@/components/dashboard/task-list-card";
-import { KickCounterCard } from "@/components/dashboard/kick-counter-card";
-import { ContractionTimerCard } from "@/components/dashboard/contraction-timer-card";
-import { WeightTrackerCard } from "@/components/dashboard/weight-tracker-card";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import withAuth from "@/components/with-auth";
@@ -95,14 +92,8 @@ function DashboardPage() {
                 <SizeVizCard currentWeek={currentWeek} />
                 <WeeklyUpdateCard currentWeek={currentWeek} />
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <WeightTrackerCard />
-                <KickCounterCard />
-            </div>
             
             <div className="grid grid-cols-1 gap-6">
-                <ContractionTimerCard />
                 <TaskListCard currentTrimester={currentTrimester} />
             </div>
          </>

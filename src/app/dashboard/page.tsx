@@ -14,6 +14,7 @@ import { DueDateCard } from "@/components/dashboard/due-date-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { DailyJournalCard } from "@/components/dashboard/daily-journal-card";
 import { WeeklyUpdateCard } from "@/components/dashboard/weekly-update-card";
+import { WellnessTrackerCard } from "@/components/dashboard/wellness-tracker-card";
 
 function DashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -95,8 +96,8 @@ function DashboardPage() {
                 </Card>
             </div>
 
+            <WellnessTrackerCard />
             <DailyJournalCard />
-            
             <WeeklyUpdateCard currentWeek={currentWeek} />
 
             <div className="grid grid-cols-1 gap-6">

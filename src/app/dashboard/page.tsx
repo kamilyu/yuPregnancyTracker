@@ -95,10 +95,10 @@ function DashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-
+            
+            <WeeklyUpdateCard currentWeek={currentWeek} />
             <WellnessTrackerCard />
             <DailyJournalCard />
-            <WeeklyUpdateCard currentWeek={currentWeek} />
 
             <div className="grid grid-cols-1 gap-6">
                 <TaskListCard currentTrimester={currentTrimester} />

@@ -22,5 +22,5 @@ export function SignInButton() {
         )
     }
 
-    return <Button onClick={() => router.push('/login')}>Sign in with Google</Button>;
+    return <Button onClick={() => router.push('/')}>Sign in with Google</Button>;
 }

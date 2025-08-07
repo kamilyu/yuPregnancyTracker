@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -66,7 +65,7 @@ export function TaskListCard({ currentTrimester }: TaskListCardProps) {
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
             <CheckCircle2 className="text-primary" />
-            Appointments & Tasks
+            Trimester Checklist
         </CardTitle>
         <CardDescription>
           A helpful checklist for your pregnancy journey.

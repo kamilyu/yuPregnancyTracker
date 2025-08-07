@@ -88,20 +88,24 @@ export function TaskListCard({ currentTrimester }: TaskListCardProps) {
                 <AccordionContent>
                   <div className="space-y-4">
                     {trimester.tasks.map((task) => (
-                      <div key={task.id} className="flex items-center space-x-3">
-                        <Checkbox
-                          id={task.id}
-                          checked={!!checkedTasks[task.id]}
-                          onCheckedChange={() => handleCheckChange(task.id)}
-                          disabled={!user}
-                        />
-                        <label
-                          htmlFor={task.id}
-                          className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${checkedTasks[task.id] ? "line-through text-muted-foreground" : ""}`}
-                        >
-                          {task.text}
-                        </label>
-                      </div>
+                      task.isHeading ? (
+                        <h4 key={task.id} className="font-semibold text-primary/90 pt-2">{task.text}</h4>
+                      ) : (
+                        <div key={task.id} className="flex items-center space-x-3">
+                          <Checkbox
+                            id={task.id}
+                            checked={!!checkedTasks[task.id]}
+                            onCheckedChange={() => handleCheckChange(task.id)}
+                            disabled={!user}
+                          />
+                          <label
+                            htmlFor={task.id}
+                            className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${checkedTasks[task.id] ? "line-through text-muted-foreground" : ""}`}
+                          >
+                            {task.text}
+                          </label>
+                        </div>
+                      )
                     ))}
                   </div>
                 </AccordionContent>

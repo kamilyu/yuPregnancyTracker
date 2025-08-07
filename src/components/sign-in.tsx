@@ -40,6 +40,9 @@ export function SignIn() {
           journalStreak: 0,
           longestJournalStreak: 0,
           lastJournalEntry: null,
+          missionStreak: 0,
+          longestMissionStreak: 0,
+          lastMissionCompletionDate: null,
           unitPreference: 'imperial'
         });
       }

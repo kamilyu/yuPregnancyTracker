@@ -4,7 +4,7 @@
 import { useState, useEffect, useTransition } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc, Timestamp, collection, writeBatch } from "firebase/firestore";
+import { doc, getDoc, setDoc, Timestamp, writeBatch } from "firebase/firestore";
 import { generateDailyMissions } from "@/ai/flows/mission-flow";
 import type { Mission } from "@/ai/schemas/mission-schemas";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -45,12 +45,7 @@ export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) 
                 const userData = userDocSnap.data();
 
                 if (userData) {
-                    const lastCompletionDate = userData.lastMissionCompletionDate?.toDate();
-                    if (lastCompletionDate && isToday(lastCompletionDate)) {
-                         setStreak(userData.missionStreak || 0);
-                    } else {
-                         setStreak(0); // Streak resets if not completed today
-                    }
+                   setStreak(userData.missionStreak || 0);
                 }
 
                 if (missionDocSnap.exists()) {
@@ -102,20 +97,20 @@ export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) 
                  const lastCompletionDate = userData?.lastMissionCompletionDate?.toDate();
 
                  let newStreak = userData?.missionStreak || 0;
+                 // Only increment streak if the last completion wasn't today
                  if (!lastCompletionDate || !isToday(lastCompletionDate)) {
                     newStreak = newStreak + 1;
-                 }
                  
-                 const batch = writeBatch(db);
-                 batch.update(userDocRef, {
-                    missionStreak: newStreak,
-                    lastMissionCompletionDate: Timestamp.now(),
-                    longestMissionStreak: Math.max(userData?.longestMissionStreak || 0, newStreak)
-                 });
-                 await batch.commit();
-
-                 setStreak(newStreak);
-                 toast({ title: "🎉 All missions completed for today! Great job!" });
+                    const batch = writeBatch(db);
+                    batch.update(userDocRef, {
+                        missionStreak: newStreak,
+                        lastMissionCompletionDate: Timestamp.now(),
+                        longestMissionStreak: Math.max(userData?.longestMissionStreak || 0, newStreak)
+                    });
+                    await batch.commit();
+                    setStreak(newStreak);
+                    toast({ title: "🎉 All missions completed for today! Great job!" });
+                 }
             }
         }
     };

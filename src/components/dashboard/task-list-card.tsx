@@ -20,7 +20,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { pregnancyTasks } from "@/data/pregnancy-data";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Lock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type TaskListCardProps = {
   currentTrimester: number;
@@ -73,33 +74,40 @@ export function TaskListCard({ currentTrimester }: TaskListCardProps) {
       </CardHeader>
       <CardContent>
         <Accordion type="single" collapsible defaultValue={defaultAccordionValue} className="w-full">
-          {pregnancyTasks.map((trimester) => (
-            <AccordionItem value={`trimester-${trimester.trimester}`} key={trimester.trimester}>
-              <AccordionTrigger className="font-semibold">
-                {trimester.title}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-4">
-                  {trimester.tasks.map((task) => (
-                    <div key={task.id} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={task.id}
-                        checked={!!checkedTasks[task.id]}
-                        onCheckedChange={() => handleCheckChange(task.id)}
-                        disabled={!user}
-                      />
-                      <label
-                        htmlFor={task.id}
-                        className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${checkedTasks[task.id] ? "line-through text-muted-foreground" : ""}`}
-                      >
-                        {task.text}
-                      </label>
+          {pregnancyTasks.map((trimester) => {
+            const isLocked = trimester.trimester > currentTrimester;
+            return (
+              <AccordionItem value={`trimester-${trimester.trimester}`} key={trimester.trimester} disabled={isLocked}>
+                <AccordionTrigger className={cn("font-semibold", isLocked && "text-muted-foreground hover:no-underline cursor-not-allowed")}>
+                    <div className="flex items-center gap-2">
+                        {isLocked && <Lock className="w-4 h-4" />}
+                        {trimester.title}
+                        {isLocked && <span className="text-xs font-normal ml-2">(Coming Soon)</span>}
                     </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-4">
+                    {trimester.tasks.map((task) => (
+                      <div key={task.id} className="flex items-center space-x-3">
+                        <Checkbox
+                          id={task.id}
+                          checked={!!checkedTasks[task.id]}
+                          onCheckedChange={() => handleCheckChange(task.id)}
+                          disabled={!user}
+                        />
+                        <label
+                          htmlFor={task.id}
+                          className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${checkedTasks[task.id] ? "line-through text-muted-foreground" : ""}`}
+                        >
+                          {task.text}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )
+          })}
         </Accordion>
       </CardContent>
     </Card>

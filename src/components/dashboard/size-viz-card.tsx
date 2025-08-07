@@ -58,12 +58,12 @@ export function SizeVizCard({ currentWeek, unitPreference, setUnitPreference }: 
       </CardHeader>
       <CardContent className="flex flex-col items-center text-center">
         <Image
-          src={`https://placehold.co/200x200.png`}
+          src={`https://placehold.co/400x400.png`}
           alt={comparison.item}
           data-ai-hint={comparison.hint}
-          width={150}
-          height={150}
-          className="rounded-full bg-accent/50 object-contain w-36 h-36 p-4 transition-transform hover:scale-105 duration-300"
+          width={200}
+          height={200}
+          className="rounded-full bg-accent/50 object-contain w-48 h-48 p-4 transition-transform hover:scale-105 duration-300"
         />
         <p className="mt-4 text-lg">
           Your baby is about the size of a

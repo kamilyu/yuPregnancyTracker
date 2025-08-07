@@ -1,5 +1,4 @@
 
-'use server';
 /**
  * @fileOverview Schemas for the daily wellness mission generation flow.
  */

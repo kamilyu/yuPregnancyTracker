@@ -1,8 +1,8 @@
 
 export const weeklySizeComparisons = [
   { week: 4, item: "Poppy Seed", hint: "poppy seed", height: "0.04 in", weight: "< 0.04 oz", height_cm: "0.1 cm", weight_g: "< 1 g", image: "/images/sizes/poppy-seed.png" },
-  { week: 5, item: "Apple Seed", hint: "apple seed", height: "0.05 in", weight: "< 0.04 oz", height_cm: "0.13 cm", weight_g: "< 1 g", image: "/images/sizes/apple-seed.png" },
-  { week: 6, item: "Sweet Pea", hint: "sweet pea", height: "0.25 in", weight: "< 0.04 oz", height_cm: "0.64 cm", weight_g: "< 1 g", image: "/images/sizes/sweet-pea.png" },
+  { week: 5, item: "Sesame Seed", hint: "sesame seed", height: "0.05 in", weight: "< 0.04 oz", height_cm: "0.13 cm", weight_g: "< 1 g", image: "/images/sizes/sesame-seed.png" },
+  { week: 6, item: "Lentil", hint: "lentil", height: "0.25 in", weight: "< 0.04 oz", height_cm: "0.64 cm", weight_g: "< 1 g", image: "/images/sizes/lentil.png" },
   { week: 7, item: "Blueberry", hint: "blueberry", height: "0.5 in", weight: "< 0.04 oz", height_cm: "1.27 cm", weight_g: "< 1 g", image: "/images/sizes/blueberry.png" },
   { week: 8, item: "Raspberry", hint: "raspberry", height: "0.63 in", weight: "0.04 oz", height_cm: "1.6 cm", weight_g: "1 g", image: "/images/sizes/raspberry.png" },
   { week: 9, item: "Cherry", hint: "cherry", height: "0.9 in", weight: "0.07 oz", height_cm: "2.3 cm", weight_g: "2 g", image: "/images/sizes/cherry.png" },

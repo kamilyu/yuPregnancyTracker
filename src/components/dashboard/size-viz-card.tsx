@@ -58,11 +58,11 @@ export function SizeVizCard({ currentWeek, unitPreference, setUnitPreference }: 
       </CardHeader>
       <CardContent className="flex flex-col items-center text-center">
         <Image
-          src={`https://placehold.co/400x400.png`}
+          src={comparison.image}
           alt={comparison.item}
+          width={400}
+          height={400}
           data-ai-hint={comparison.hint}
-          width={200}
-          height={200}
           className="rounded-full bg-accent/50 object-contain w-48 h-48 p-4 transition-transform hover:scale-105 duration-300"
         />
         <p className="mt-4 text-lg">

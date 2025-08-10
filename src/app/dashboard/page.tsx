@@ -16,6 +16,7 @@ import { DailyJournalCard } from "@/components/dashboard/daily-journal-card";
 import { WeeklyUpdateCard } from "@/components/dashboard/weekly-update-card";
 import { Separator } from "@/components/ui/separator";
 import { DailyMissionsCard } from "@/components/dashboard/daily-missions-card";
+import { QuestionOfTheDayCard } from "@/components/dashboard/question-of-the-day-card";
 
 type UnitPreference = 'imperial' | 'metric';
 
@@ -112,6 +113,7 @@ function DashboardPage() {
             <WeeklyUpdateCard currentWeek={currentWeek} />
             <DailyMissionsCard pregnancyWeek={currentWeek} />
             <DailyJournalCard />
+            <QuestionOfTheDayCard />
 
             <div className="grid grid-cols-1 gap-6">
                 <TaskListCard currentTrimester={currentTrimester} />

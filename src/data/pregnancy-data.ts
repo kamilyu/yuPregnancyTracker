@@ -18,7 +18,7 @@ export const weeklySizeComparisons = [
   { week: 19, item: "Heirloom Tomato", hint: "heirloom tomato", height: "6 in", weight: "8.5 oz", height_cm: "15.2 cm", weight_g: "241 g", image: "/images/sizes/heirloom-tomato.png" },
   { week: 20, item: "Banana", hint: "banana", height: "10 in (crown-heel)", weight: "10.6 oz", height_cm: "25.4 cm", weight_g: "300 g", image: "/images/sizes/banana.png" },
   { week: 21, item: "Carrot", hint: "carrot", height: "10.5 in", weight: "12.7 oz", height_cm: "26.7 cm", weight_g: "360 g", image: "/images/sizes/carrot.png" },
-  { week: 22, item: "Spaghetti Squash", hint: "spaghetti squash", height: "10.9 in", weight: "15.2 oz", height_cm: "27.7 cm", weight_g: "431 g", image: "/images/sizes/spaghetti-squash.png" },
+  { week: 22, item: "Papaya", hint: "papaya", height: "10.9 in", weight: "15.2 oz", height_cm: "27.7 cm", weight_g: "431 g", image: "/images/sizes/papaya.png" },
   { week: 23, item: "Grapefruit", hint: "grapefruit", height: "11.4 in", weight: "1.1 lbs", height_cm: "29 cm", weight_g: "499 g", image: "/images/sizes/grapefruit.png" },
   { week: 24, item: "Corn on the Cob", hint: "corn cob", height: "11.8 in", weight: "1.3 lbs", height_cm: "30 cm", weight_g: "590 g", image: "/images/sizes/corn-on-the-cob.png" },
   { week: 25, item: "Rutabaga", hint: "rutabaga", height: "13.6 in", weight: "1.5 lbs", height_cm: "34.5 cm", weight_g: "680 g", image: "/images/sizes/rutabaga.png" },

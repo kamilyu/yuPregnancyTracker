@@ -89,9 +89,17 @@ export function DailyJournalCard() {
     }, [user, todayId, toast]);
 
     const handleSymptomChange = (symptom: string) => {
-        setSelectedSymptoms(prev => 
-            prev.includes(symptom) ? prev.filter(s => s !== symptom) : [...prev, symptom]
-        );
+        setSelectedSymptoms(prev => {
+            if (symptom === 'No Symptoms') {
+                return prev.includes('No Symptoms') ? [] : ['No Symptoms'];
+            }
+            const newSymptoms = prev.filter(s => s !== 'No Symptoms');
+            if (newSymptoms.includes(symptom)) {
+                return newSymptoms.filter(s => s !== symptom);
+            } else {
+                return [...newSymptoms, symptom];
+            }
+        });
     }
 
     const handleSave = async () => {

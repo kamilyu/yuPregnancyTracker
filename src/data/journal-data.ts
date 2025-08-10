@@ -9,6 +9,7 @@ export const moods = [
 ];
 
 export const symptoms = [
+    "No Symptoms",
     "Nausea",
     "Fatigue",
     "Back Pain",

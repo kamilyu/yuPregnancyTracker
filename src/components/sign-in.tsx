@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
@@ -11,14 +11,22 @@ import { useToast } from "@/hooks/use-toast";
 import { StorkLogo } from "@/components/logo";
 import { Loader2 } from "lucide-react";
 import { auth, db } from "@/lib/firebase";
+import { useAuth } from "@/context/auth-context";
 
 export function SignIn() {
   const router = useRouter();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, loading: authLoading } = useAuth();
+  const [isSigningIn, setIsSigningIn] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, authLoading, router]);
 
   const handleSignIn = async () => {
-    setIsLoading(true);
+    setIsSigningIn(true);
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
@@ -51,8 +59,7 @@ export function SignIn() {
         title: "Login Successful",
         description: "Redirecting to your dashboard...",
       });
-      router.push("/dashboard");
-
+      // The useEffect will handle the redirection
     } catch (error: any) {
       console.error("Authentication error:", error);
       toast({
@@ -61,10 +68,17 @@ export function SignIn() {
         description: error.message || "Please try again.",
       });
     } finally {
-      setIsLoading(false);
+      setIsSigningIn(false);
     }
   };
 
+  if (authLoading || user) {
+    return (
+       <div className="flex h-screen items-center justify-center bg-secondary/50">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
+       </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary/50 p-4">
@@ -77,8 +91,8 @@ export function SignIn() {
           <p className="text-muted-foreground">Sign in with Google to begin your journey.</p>
         </div>
         <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-8 text-center">
-          <Button onClick={handleSignIn} disabled={isLoading} size="lg">
-            {isLoading && (
+          <Button onClick={handleSignIn} disabled={isSigningIn} size="lg">
+            {isSigningIn && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             Sign in with Google

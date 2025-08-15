@@ -1,20 +1,26 @@
 
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, setDoc, Timestamp, writeBatch } from "firebase/firestore";
-import { generateDailyMissions } from "@/ai/flows/mission-flow";
-import type { Mission } from "@/ai/schemas/mission-schemas";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Target, Flame } from "lucide-react";
+import { Target, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isToday } from "date-fns";
 import { Skeleton } from "../ui/skeleton";
+import { dailyWellnessMissions } from "@/data/mission-data";
+
+type Mission = {
+    id: string;
+    title: string;
+    description: string;
+    isCompleted: boolean;
+};
 
 type DailyMissionDoc = {
     missions: Mission[];
@@ -22,10 +28,16 @@ type DailyMissionDoc = {
     generatedAt: Timestamp;
 };
 
+// Function to shuffle an array and pick the first n items
+function getRandomMissions(arr: typeof dailyWellnessMissions, n: number): Mission[] {
+  const shuffled = [...arr].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, n).map(m => ({ ...m, isCompleted: false }));
+}
+
+
 export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) {
     const { user } = useAuth();
     const { toast } = useToast();
-    const [isPending, startTransition] = useTransition();
     const [missions, setMissions] = useState<Mission[]>([]);
     const [loading, setLoading] = useState(true);
     const [streak, setStreak] = useState(0);
@@ -52,19 +64,13 @@ export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) 
                     const missionData = missionDocSnap.data() as DailyMissionDoc;
                     setMissions(missionData.missions);
                 } else {
-                    startTransition(async () => {
-                        const previousMissionIds: string[] = []; // TODO: Fetch recent missions to avoid repeats
-                        const result = await generateDailyMissions({ pregnancyWeek, previousMissionIds });
-                        if (result && result.missions) {
-                            const newMissions = result.missions.map(m => ({...m, id: m.category + "_" + Date.now() + Math.random()}));
-                            await setDoc(missionDocRef, { 
-                                missions: newMissions,
-                                isCompleted: false,
-                                generatedAt: Timestamp.now()
-                            });
-                            setMissions(newMissions);
-                        }
+                    const newMissions = getRandomMissions(dailyWellnessMissions, 4);
+                    await setDoc(missionDocRef, { 
+                        missions: newMissions,
+                        isCompleted: false,
+                        generatedAt: Timestamp.now()
                     });
+                    setMissions(newMissions);
                 }
             } catch (error) {
                 console.error("Error fetching or generating missions:", error);
@@ -75,7 +81,7 @@ export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) 
         };
 
         fetchMissions();
-    }, [user, todayId, pregnancyWeek, toast]);
+    }, [user, todayId, toast]);
 
     const handleMissionCheck = async (missionId: string) => {
         const updatedMissions = missions.map(m =>
@@ -83,8 +89,7 @@ export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) 
         );
         setMissions(updatedMissions);
 
-        const completedCount = updatedMissions.filter(m => m.isCompleted).length;
-        const allCompleted = completedCount === missions.length;
+        const allCompleted = updatedMissions.every(m => m.isCompleted);
 
         if (user) {
             const missionDocRef = doc(db, 'users', user.uid, 'dailyMissions', todayId);
@@ -97,15 +102,14 @@ export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) 
                  const lastCompletionDate = userData?.lastMissionCompletionDate?.toDate();
 
                  let newStreak = userData?.missionStreak || 0;
-                 // Only increment streak if the last completion wasn't today
                  if (!lastCompletionDate || !isToday(lastCompletionDate)) {
                     newStreak = newStreak + 1;
                  
                     const batch = writeBatch(db);
                     batch.update(userDocRef, {
                         missionStreak: newStreak,
+                        longestMissionStreak: Math.max(userData?.longestMissionStreak || 0, newStreak),
                         lastMissionCompletionDate: Timestamp.now(),
-                        longestMissionStreak: Math.max(userData?.longestMissionStreak || 0, newStreak)
                     });
                     await batch.commit();
                     setStreak(newStreak);
@@ -140,7 +144,7 @@ export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) 
             <CardContent className="space-y-4">
                  <Progress value={progress} className="h-3" />
                  <div className="space-y-3">
-                    {(loading || isPending) ? (
+                    {loading ? (
                         <>
                             <Skeleton className="h-10 w-full" />
                             <Skeleton className="h-10 w-full" />
@@ -151,29 +155,23 @@ export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) 
                         <div
                             key={mission.id}
                             className={cn(
-                                "flex items-center gap-4 p-3 rounded-lg transition-colors",
+                                "flex items-start gap-4 p-3 rounded-lg transition-colors",
                                 mission.isCompleted ? "bg-secondary/60 text-muted-foreground line-through" : "bg-secondary/30"
                             )}
                         >
-                            <span className="text-2xl">{mission.icon}</span>
-                            <div className="flex-grow">
-                                <p className="font-semibold">{mission.title}</p>
-                                <p className="text-xs">{mission.description}</p>
-                            </div>
                             <Checkbox
                                 checked={mission.isCompleted}
                                 onCheckedChange={() => handleMissionCheck(mission.id)}
-                                className="h-6 w-6"
+                                className="h-6 w-6 mt-1"
+                                id={`mission-${mission.id}`}
                             />
+                            <div className="flex-grow">
+                                <label htmlFor={`mission-${mission.id}`} className="font-semibold cursor-pointer">{mission.title}</label>
+                                <p className="text-xs">{mission.description}</p>
+                            </div>
                         </div>
                     ))}
                  </div>
-                 {isPending && !loading && (
-                    <div className="flex items-center justify-center text-muted-foreground text-sm">
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating your personalized missions for today...
-                    </div>
-                 )}
             </CardContent>
         </Card>
     );

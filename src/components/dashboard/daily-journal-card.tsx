@@ -169,21 +169,21 @@ export function DailyJournalCard() {
 
     return (
         <Card className="overflow-hidden">
-            <div className="bg-secondary/30 p-4 sm:p-6 flex justify-between items-center">
+            <div className="bg-secondary/10 p-4 sm:p-6 flex justify-between items-center">
                 <div>
-                    <h3 className="font-headline text-xl">Daily Check-in</h3>
+                    <h3 className="font-headline text-xl text-secondary-foreground/80">Daily Check-in</h3>
                     <p className="text-muted-foreground text-sm">How are you feeling today?</p>
                 </div>
                 <div className="flex gap-4">
                     <div className="text-center">
-                        <div className="flex items-center justify-center text-primary gap-1">
+                        <div className="flex items-center justify-center text-secondary/80 gap-1">
                             <Flame className="w-6 h-6"/>
                             <span className="text-3xl font-bold">{currentStreak}</span>
                         </div>
                         <p className="text-xs text-muted-foreground -mt-1">Day Streak</p>
                     </div>
                      <div className="text-center">
-                        <div className="flex items-center justify-center text-primary/80 gap-1">
+                        <div className="flex items-center justify-center text-secondary/70 gap-1">
                             <Trophy className="w-6 h-6"/>
                             <span className="text-3xl font-bold">{longestStreak}</span>
                         </div>
@@ -202,7 +202,7 @@ export function DailyJournalCard() {
                                     onClick={() => setSelectedMood(mood.label)}
                                     className={cn(
                                         "p-2 flex flex-col items-center gap-1.5 rounded-lg border-2 transition-colors",
-                                        selectedMood === mood.label ? "border-primary bg-primary/10" : "border-transparent bg-secondary/50 hover:bg-secondary"
+                                        selectedMood === mood.label ? "border-secondary bg-secondary/10" : "border-transparent bg-muted/50 hover:bg-muted"
                                     )}
                                 >
                                     <span className="text-2xl">{mood.icon}</span>
@@ -220,6 +220,7 @@ export function DailyJournalCard() {
                                         id={`symptom-${symptom}`}
                                         checked={selectedSymptoms.includes(symptom)}
                                         onCheckedChange={() => handleSymptomChange(symptom)}
+                                        className="data-[state=checked]:bg-secondary data-[state=checked]:border-secondary"
                                     />
                                     <label
                                         htmlFor={`symptom-${symptom}`}
@@ -242,7 +243,7 @@ export function DailyJournalCard() {
                             className="flex-grow"
                         />
                     </div>
-                    <Button onClick={handleSave}>
+                    <Button onClick={handleSave} variant="secondary">
                        <Sparkles className="mr-2" /> {todaysEntry ? 'Update Today\'s Entry' : 'Save Today\'s Entry'}
                     </Button>
                 </div>

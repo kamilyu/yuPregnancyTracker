@@ -127,13 +127,13 @@ export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) 
                 <div className="flex justify-between items-center">
                     <div>
                         <CardTitle className="font-headline flex items-center gap-2">
-                            <Target className="text-primary"/>
+                            <Target className="text-accent-foreground"/>
                             Daily Wellness Missions
                         </CardTitle>
                         <CardDescription>Complete these 4 missions to build healthy habits.</CardDescription>
                     </div>
                      <div className="text-center">
-                        <div className="flex items-center justify-center text-primary gap-1">
+                        <div className="flex items-center justify-center text-accent-foreground gap-1">
                             <Flame className="w-6 h-6"/>
                             <span className="text-3xl font-bold">{streak}</span>
                         </div>
@@ -142,7 +142,7 @@ export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) 
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">
-                 <Progress value={progress} className="h-3" />
+                 <Progress value={progress} className="h-3 [&>div]:bg-accent" />
                  <div className="space-y-3">
                     {loading ? (
                         <>
@@ -156,13 +156,13 @@ export function DailyMissionsCard({ pregnancyWeek }: { pregnancyWeek: number }) 
                             key={mission.id}
                             className={cn(
                                 "flex items-start gap-4 p-3 rounded-lg transition-colors",
-                                mission.isCompleted ? "bg-secondary/60 text-muted-foreground line-through" : "bg-secondary/30"
+                                mission.isCompleted ? "bg-muted text-muted-foreground line-through" : "bg-muted/50"
                             )}
                         >
                             <Checkbox
                                 checked={mission.isCompleted}
                                 onCheckedChange={() => handleMissionCheck(mission.id)}
-                                className="h-6 w-6 mt-1"
+                                className="h-6 w-6 mt-1 data-[state=checked]:bg-accent data-[state=checked]:border-accent"
                                 id={`mission-${mission.id}`}
                             />
                             <div className="flex-grow">

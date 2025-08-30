@@ -272,7 +272,7 @@ export function ContractionTimerCard() {
         <CardDescription>Time contractions and track their frequency.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex flex-col items-center justify-center gap-4 p-4 bg-secondary/30 rounded-lg">
+        <div className="flex flex-col items-center justify-center gap-4 p-4 bg-muted rounded-lg">
             <div className='text-6xl font-mono font-bold text-primary tabular-nums'>
                 {formatDuration(isTiming ? currentDuration : lastContractionDuration ?? 0)}
             </div>
@@ -314,7 +314,7 @@ export function ContractionTimerCard() {
                 </div>
             </div>
             {currentSession.length > 0 &&
-                <div className='grid grid-cols-3 text-center text-sm bg-secondary/50 p-2 rounded-md'>
+                <div className='grid grid-cols-3 text-center text-sm bg-muted p-2 rounded-md'>
                     <div><p className='font-medium'>{formatDuration(avgDuration)}</p><p className='text-muted-foreground'>Avg. Duration</p></div>
                     <div><p className='font-medium'>{formatDuration(avgFrequency)}</p><p className='text-muted-foreground'>Avg. Frequency</p></div>
                     <div><p className={`font-medium ${isRegular ? 'text-green-600' : 'text-amber-600'}`}>{isRegular ? 'Regular' : 'Irregular'}</p><p className='text-muted-foreground'>Pattern</p></div>
@@ -324,7 +324,7 @@ export function ContractionTimerCard() {
                 {allContractions.length > 0 ? (
                     <div className='p-2 space-y-2'>
                         {allContractions.map((c) => (
-                            <div key={c.id || c.startTime} className={`p-2 rounded-md ${currentSession.some(cs => cs.startTime === c.startTime) ? 'bg-secondary/80' : 'bg-secondary/30'} grid grid-cols-[1fr,auto,auto,auto] items-center text-sm gap-2`}>
+                            <div key={c.id || c.startTime} className={`p-2 rounded-md ${currentSession.some(cs => cs.startTime === c.startTime) ? 'bg-primary/10' : 'bg-muted/50'} grid grid-cols-[1fr,auto,auto,auto] items-center text-sm gap-2`}>
                                 <div className='font-medium'>
                                     {isValid(new Date(c.startTime)) ? format(new Date(c.startTime), 'h:mm:ss a') : '--:--:--'}
                                 </div>
@@ -375,6 +375,3 @@ export function ContractionTimerCard() {
     </Card>
   );
 }
-
-    
-    

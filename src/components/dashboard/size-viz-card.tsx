@@ -41,19 +41,20 @@ export function SizeVizCard({ currentWeek, unitPreference, setUnitPreference }: 
 
 
   return (
-    <Card>
+    <Card className="bg-gradient-to-br from-primary/80 to-primary/60 text-primary-foreground">
       <CardHeader className="flex flex-row items-start justify-between">
         <div>
           <CardTitle className="font-headline">Baby's Size This Week</CardTitle>
         </div>
         <div className="flex items-center space-x-2">
-          <Label htmlFor="unit-switch" className="text-xs text-muted-foreground">lbs/in</Label>
+          <Label htmlFor="unit-switch" className="text-xs text-primary-foreground/80">lbs/in</Label>
           <Switch
             id="unit-switch"
             checked={unitPreference === 'metric'}
             onCheckedChange={handleUnitChange}
+            className="data-[state=checked]:bg-white/30 data-[state=unchecked]:bg-white/30"
           />
-          <Label htmlFor="unit-switch" className="text-xs text-muted-foreground">kg/cm</Label>
+          <Label htmlFor="unit-switch" className="text-xs text-primary-foreground/80">kg/cm</Label>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col items-center text-center">
@@ -63,25 +64,25 @@ export function SizeVizCard({ currentWeek, unitPreference, setUnitPreference }: 
           width={400}
           height={400}
           data-ai-hint={comparison.hint}
-          className="rounded-full bg-accent/50 object-contain w-48 h-48 p-4 transition-transform hover:scale-105 duration-300"
+          className="rounded-full bg-white/20 object-contain w-48 h-48 p-4 transition-transform hover:scale-105 duration-300"
         />
         <p className="mt-4 text-lg">
           Your baby is about the size of a
         </p>
-        <p className="text-2xl font-bold text-primary">{comparison.item}</p>
+        <p className="text-2xl font-bold">{comparison.item}</p>
         
-        <Separator className="my-4" />
+        <Separator className="my-4 bg-white/30" />
 
         <div className="grid grid-cols-2 gap-4 w-full text-center">
             <div>
-                <Ruler className="mx-auto mb-1 h-5 w-5 text-primary/80" />
-                <p className="text-xl font-bold text-primary">{unitPreference === 'metric' ? comparison.height_cm : comparison.height}</p>
-                <p className="text-sm text-muted-foreground">Est. Height</p>
+                <Ruler className="mx-auto mb-1 h-5 w-5 text-primary-foreground/80" />
+                <p className="text-xl font-bold">{unitPreference === 'metric' ? comparison.height_cm : comparison.height}</p>
+                <p className="text-sm text-primary-foreground/80">Est. Height</p>
             </div>
             <div>
-                 <Weight className="mx-auto mb-1 h-5 w-5 text-primary/80" />
-                <p className="text-xl font-bold text-primary">{unitPreference === 'metric' ? comparison.weight_g : comparison.weight}</p>
-                <p className="text-sm text-muted-foreground">Est. Weight</p>
+                 <Weight className="mx-auto mb-1 h-5 w-5 text-primary-foreground/80" />
+                <p className="text-xl font-bold">{unitPreference === 'metric' ? comparison.weight_g : comparison.weight}</p>
+                <p className="text-sm text-primary-foreground/80">Est. Weight</p>
             </div>
         </div>
 

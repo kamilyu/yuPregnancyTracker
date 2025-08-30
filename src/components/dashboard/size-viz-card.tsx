@@ -47,13 +47,13 @@ export function SizeVizCard({ currentWeek, unitPreference, setUnitPreference }: 
           <CardTitle className="font-headline">Baby's Size This Week</CardTitle>
         </div>
         <div className="flex items-center space-x-2">
-          <Label htmlFor="unit-switch" className="text-sm text-muted-foreground">lbs/in</Label>
+          <Label htmlFor="unit-switch" className="text-xs text-muted-foreground">lbs/in</Label>
           <Switch
             id="unit-switch"
             checked={unitPreference === 'metric'}
             onCheckedChange={handleUnitChange}
           />
-          <Label htmlFor="unit-switch" className="text-sm text-muted-foreground">kg/cm</Label>
+          <Label htmlFor="unit-switch" className="text-xs text-muted-foreground">kg/cm</Label>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col items-center text-center">

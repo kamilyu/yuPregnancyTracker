@@ -171,7 +171,7 @@ export function DailyJournalCard() {
         <Card className="overflow-hidden">
             <div className="bg-secondary/10 p-4 sm:p-6 flex justify-between items-center">
                 <div>
-                    <h3 className="font-headline text-xl text-secondary-foreground/80">Daily Check-in</h3>
+                    <h3 className="font-headline text-xl text-black">Daily Check-in</h3>
                     <p className="text-muted-foreground text-sm">How are you feeling today?</p>
                 </div>
                 <div className="flex gap-4">
